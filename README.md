@@ -13,9 +13,7 @@ client needed. This connection will be via https or http, password protected. Yo
   For the noVNC part I used the following repo and made some small modifications:
 https://github.com/mccahill/docker-eclipse-novnc. Have a look there for a description how to enable the encrypted noVNC session (you will have to place the certificate - a .pem file - in the noVNC folder). Your browser can be pointed to https://<your external ip >:6080/vnc.html or use http instead of https, after you started your app on the server of course.
   Look for the string badpassword in the Dockerfile and replace it with the one you will use.
-Edit docker-compose.yml, replace each folder_name_in_container, volume_name_onhost with your choice. Edit further environment variables as you wish. If you uncomment
-#      ENABLE_HTTP: "Y" 
-you can use http besides https in your URL, otherwise only https.
+Edit docker-compose.yml, replace each folder_name_in_container, volume_name_onhost with your choice. Edit further environment variables as you wish. If you uncomment #      ENABLE_HTTP: "Y" you can use http besides https in your URL, otherwise only https.
   Put the dockerfile and docker-compose.yml in a folder and git clone the repository here too. There are a couple of ADD statements
 in the Dockerfile that put files from the elixir-dev-anywhere-docker folder on the host into your image. If you have another display than 1920X1080 you can edit the browser viewportsize in elixir-dev-anywhere-docker/xorg.conf before you build the image, look for Section "Screen" key Virtual and edit. Note that screen resolution !== browsevieport resolution (except width).
   After you created the image and started the app (with sudo docker-compose up -d) give the containers a couple of seconds before you
