@@ -1,0 +1,1 @@
+sudo docker run -i -t -p 6080:6080 -e UBUNTUPASS=meow -e VNCPASS=mousey -h hostname docker-eclipse-novnc

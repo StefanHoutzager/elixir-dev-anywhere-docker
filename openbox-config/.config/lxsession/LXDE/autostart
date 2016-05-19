@@ -1,0 +1,4 @@
+@xscreensaver -no-splash
+@lxpanel --profile LXDE
+@pcmanfm --desktop --profile LXDE
+@/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1
