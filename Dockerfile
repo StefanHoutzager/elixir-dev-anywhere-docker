@@ -1,13 +1,56 @@
 FROM ubuntu:14.04
-MAINTAINER Mark McCahill <mccahill@duke.edu>
+MAINTAINER Stefan Houtzager <stefan.houtzager@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV REFRESHED_AT 14-05-2016
+ENV TERM xterm
 ENV HOME /root
 
+WORKDIR /
+
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+    wget \
+    curl \
+    unzip
+
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# erlang install
+RUN echo "deb http://packages.erlang-solutions.com/ubuntu trusty contrib" >> /etc/apt/sources.list && \
+    apt-key adv --fetch-keys http://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc && \
+    apt-get -qq update && apt-get install -y \
+    esl-erlang \
+    build-essential \
+    wget && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Download and Install Specific Version of Elixir
+WORKDIR /elixir
+RUN wget -q https://github.com/elixir-lang/elixir/releases/download/v1.2.5/Precompiled.zip && \
+    unzip Precompiled.zip && \
+    rm -f Precompiled.zip && \
+    ln -s /elixir/bin/elixirc /usr/local/bin/elixirc && \
+    ln -s /elixir/bin/elixir /usr/local/bin/elixir && \
+    ln -s /elixir/bin/mix /usr/local/bin/mix && \
+    ln -s /elixir/bin/iex /usr/local/bin/iex
+
+WORKDIR /
+
+# Install local Elixir hex and rebar
+RUN mix local.hex --force && \
+    mix local.rebar --force && \
+    mix hex.info
+# install Node.js (>= 5.0.0) and NPM in order to satisfy brunch.io dependencies
+RUN curl -sL https://deb.nodesource.com/setup_5.x | bash - && apt-get -y install nodejs inotify-tools
+
+RUN mix archive.install https://github.com/phoenixframework/archives/raw//master/phoenix_new.ez --force
 # setup our Ubuntu sources (ADD breaks caching)
 RUN echo "deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse\n\
 deb http://archive.ubuntu.com/ubuntu trusty-updates main restricted universe multiverse\n\
-deb http://archive.ubuntu.com/ubuntu trusty-backports main restricted universe multiverse\n\ 
+deb http://archive.ubuntu.com/ubuntu trusty-backports main restricted universe multiverse\n\
 deb http://security.ubuntu.com/ubuntu trusty-security main restricted universe multiverse \n\
 "> /etc/apt/sources.list
 
@@ -18,15 +61,24 @@ RUN dpkg-divert --local --rename --add /sbin/initctl && ln -sf /bin/true /sbin/i
 RUN apt-get update \
     && apt-get upgrade -y
 
-RUN apt-get install -y python-numpy
-RUN apt-get install -y software-properties-common wget
+RUN apt-get install -y \
+    python-numpy \
+    software-properties-common
 RUN apt-get install -y --force-yes --no-install-recommends supervisor \
-        openssh-server pwgen sudo vim-tiny \
-        net-tools \
-        lxde x11vnc xvfb \
-        gtk2-engines-murrine ttf-ubuntu-font-family \
-        libreoffice firefox \
-        xserver-xorg-video-dummy \
+    openssh-server \
+    pwgen \
+    sudo \
+    vim-tiny \
+    net-tools \
+
+    lxde \
+    x11vnc \
+    xvfb \
+    gtk2-engines-murrine \
+    ttf-ubuntu-font-family \
+    libreoffice \
+    firefox \
+    xserver-xorg-video-dummy \
     && apt-get autoclean \
     && apt-get autoremove \
     && rm -rf /var/lib/apt/lists/*
@@ -37,51 +89,35 @@ RUN chmod +x /etc/startup.aux/00.sh
 RUN mkdir -p /etc/supervisor/conf.d
 RUN rm /etc/supervisor/supervisord.conf
 
-# create an ubuntu user
-#PASS=`pwgen -c -n -1 10`
-#PASS=ubuntu
-#echo "User: ubuntu Pass: $PASS"
-#RUN useradd --create-home --shell /bin/bash --user-group --groups adm,sudo ubuntu
-
 # create an ubuntu user who cannot sudo
-RUN useradd --create-home --shell /bin/bash --user-group ubuntu
+# RUN useradd --create-home --shell /bin/bash --user-group ubuntu
+RUN useradd --create-home --shell /bin/bash --user-group --groups adm,sudo ubuntu
 RUN echo "ubuntu:badpassword" | chpasswd
-
-ADD startup.sh /
-ADD supervisord.conf.xorg /etc/supervisor/supervisord.conf
-EXPOSE 6080
-EXPOSE 5900
-EXPOSE 22
-
-ADD openbox-config /openbox-config
+ADD elixir-dev-anywhere-docker/startup.sh /
+ADD elixir-dev-anywhere-docker/supervisord.conf.xorg /etc/supervisor/supervisord.conf
+ADD elixir-dev-anywhere-docker/openbox-config /openbox-config
 RUN cp -r /openbox-config/.config ~ubuntu/
 RUN chown -R ubuntu ~ubuntu/.config ; chgrp -R ubuntu ~ubuntu/.config
 RUN rm -r /openbox-config
 
-WORKDIR /
-
-############ being Eclipse stuff ###############
-# java install
-RUN add-apt-repository ppa:webupd8team/java
-RUN apt-get update
-# say yes to the oracle license agreement
-RUN echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
-RUN echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections
-#
-RUN apt-get install -y --force-yes oracle-java8-installer
-RUN apt-get install -y --force-yes oracle-java8-set-default
-#
-# eclipse IDE
-RUN apt-get install -y desktop-file-utils
-RUN apt-get install -y eclipse
-############ end Eclipse stuff ###############
-
 # noVNC
-ADD noVNC /noVNC/
+ADD elixir-dev-anywhere-docker/noVNC /noVNC/
 # store a password for the VNC service
 RUN mkdir /home/root
 RUN mkdir /home/root/.vnc
-RUN x11vnc -storepasswd foobar /home/root/.vnc/passwd
-ADD xorg.conf /etc/X11/xorg.conf
+RUN x11vnc -storepasswd badpassword /home/root/.vnc/passwd
+ADD elixir-dev-anywhere-docker/xorg.conf /etc/X11/xorg.conf
+
+# pgadmin3 and nano
+# prerequisites to install a new version of pgadmin3 https://undebugable.wordpress.com/2016/01/11/pgadmin-3-warning-the-server-you-are-connecting-to-is-not-a-version-that-is-supported-by-this-release/
+
+# add the repository
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+# install their key
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+
+RUN apt-get update && apt-get install -y \
+    nano \
+    pgadmin3 --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["/startup.sh"]
