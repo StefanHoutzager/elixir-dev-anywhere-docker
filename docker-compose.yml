@@ -1,0 +1,33 @@
+# docker-compose.yml
+version: '2'
+
+services:
+  web:
+    image: stefan/phoenix
+    environment:
+      DATABASE_URL: postgres://rumbl:rumbl@db/rumbl_dev
+      PORT: 5432
+      MIX_ENV: "dev"
+    #  ENABLE_HTTP: "Y"
+    links:
+      - postgres
+    ports:
+      - 4000:4000
+      - 6080:6080
+      - 22:22
+      - 5090:5090
+    volumes:
+      - /var/lib/docker/volumes/volume_name_onhost/_data:/folder_name_in_container
+    stdin_open: true 
+  postgres:
+    image: postgres
+    environment:
+      LC_ALL: C.UTF-8
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - "volume_name_onhost:/var/lib/postgresql/data"
+volumes:
+  folder_name_in_container:
+  volume_name_onhost:
+
