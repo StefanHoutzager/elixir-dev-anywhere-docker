@@ -12,27 +12,43 @@ from a certain viewpoint, and it can be handy to ship developmentcontainers. I d
 (erlang/elixir/phoenix/node/pgadmin3), an x11vncserver and clientsoftware (javascript) for noVNC. The other image contains the postgresql database. You will get that one from dockerhub. The containers will be started and connected with docker-compose. I assume docker and docker-compose known and installed on your host, documentation can be found online. 
   Instructions:
 0.  Make sure you have port 6080 for noVNC and 4000 for phoenix open in your router ("port forward" for the ip-address check eth0 with     ifconfig and make this address fixed), see that you have no blocking firewalls   
+
 1.  Get the postgres image with docker pull postgres (from https://hub.docker.com/_/postgres/).
+
 2.  Create a folder for your repo.
+
 3.  Make sure that you have the latest version of docker-compose (my machine gives with docker-compose version 
     1.7.0rc2, build ea2d526), and also a docker version that supports this new docker-compose (mine is 1.10.3)
+
 4.  CD to you repo folder and git clone https://github.com/StefanHoutzager/elixir-dev-anywhere-docker.git
+
 5.  You have a elixir-dev-anywhere-docker folder in your repofolder now. Copy Dockerfile and docker-compose.yml from 
-    elixir-dev-anywhere-docker to your repo folder. There are a couple of ADD statements in the Dockerfile that put files from the elixir-dev-anywhere-docker folder on the host into your image, this way you make sure you ghave the original files in the repo. 
+    elixir-dev-anywhere-docker to your repo folder. There are a couple of ADD statements in the Dockerfile that put files from the elixir-dev-anywhere-docker folder on the host into your image, this way you make sure you ghave the original files in the repo.
+
 6. Look for the string badpassword in the Dockerfile and replace it with the one you will use.
+
 7.  To enable encrypted connections, you need to (at a minimum) create a noVNC self.pem certificate file:
     https://github.com/kanaka/websockify/wiki/Encrypted-Connections, put it in elixir-dev-anywhere-docker/noVNC
+
 8.  Edit docker-compose.yml, replace each folder_name_in_container, volume_name_onhost with your choice. Edit further environment
     variables as you wish. If you uncomment #      ENABLE_HTTP: "Y" you can use http besides https in your URL, otherwise only https.
+
 9.  I know the following is clumsy, the solution should be dynamic. See my wishlist below. If you have another display than 1920X1080 
     you can edit the browser viewportsize in elixir-dev-anywhere-docker/xorg.conf before you build the image, look for Section "Screen" key Virtual and edit. Note that screen resolution !== browseviewport resolution (except width). 
+
 10. Enter your repo folder and build the image with sudo docker build -t stefan/phoenix . | tee build.log
+
 11. If the build has been succesfull start the app with sudo docker-compose up -d  
+
 12. Note the containernames that show up in your terminal. You can use compose_postgres_1 as hostname when you start pgadmin3 later
+
 13. If you want to check the status of the containers: sudo docker ps -a
+
 14. Give the containers a couple of seconds to start al processes before you go to the noVNC page in your browser, otherwise the 
     port might prove idle.
+
 15. Point your browser to https://your external ip:6080/vnc.html (or use http)
+
 16. When you logged in sudo -i before you use iex
 
 #Credits
