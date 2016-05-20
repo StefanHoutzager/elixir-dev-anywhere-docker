@@ -62,7 +62,7 @@ For the noVNC part I used the following repo and made some small modifications: 
   docker knowledge is not enough to do this at the moment. There could be one image for noVNC + x11vncserver, one for pgadmin3, one for erlang/elixir/phoenix and one for postgres. 
 - At the moment you have to start with sudo -i to have sufficient rights to develop and start phoenix.server. It would be nice if this   is not needed anymore and your cd is the data-volume.
 - I would like to have spacemacs added as editor. Maybe this can help as starting point:
-  https://hub.docker.com/r/jare/spacemacs/~/dockerfile/The config should be in a (mutable) volume. Pointers for handy configs for elixir would be great.
+  https://hub.docker.com/r/jare/spacemacs/~/dockerfile/  The config should be in a (mutable) volume. Pointers for handy configs for elixir would be great.
 - Dynamic resize of the desktop inside the browser would be great. It seems to be built in in Kanaka's sources, see 
   https://github.com/kanaka/noVNC/pull/271 . I tried to use these by simply replacing my include folder with Kanaka's but got a js error in the browse and gave up for the moment. 
 
