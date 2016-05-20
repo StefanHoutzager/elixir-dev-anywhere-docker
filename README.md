@@ -11,6 +11,7 @@ from a certain viewpoint, and it can be handy to ship developmentcontainers. I d
   On the server you will have two images and volumes with mutable data. You will build the image with the application
 (erlang/elixir/phoenix/node/pgadmin3), an x11vncserver and clientsoftware (javascript) for noVNC. The other image contains the postgresql database. You will get that one from dockerhub. The containers will be started and connected with docker-compose. I assume docker and docker-compose known and installed on your host, documentation can be found online. 
   Instructions:
+  
 0.  Make sure you have port 6080 for noVNC and 4000 for phoenix open in your router ("port forward" for the ip-address check eth0 with     ifconfig and make this address fixed), see that you have no blocking firewalls   
 
 1.  Get the postgres image with docker pull postgres (from https://hub.docker.com/_/postgres/).
