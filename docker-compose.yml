@@ -14,8 +14,6 @@ services:
     ports:
       - 4000:4000
       - 6080:6080
-      - 22:22
-      - 5090:5090
     volumes:
       - /var/lib/docker/volumes/volume_name_onhost/_data:/folder_name_in_container
     stdin_open: true 
