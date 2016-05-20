@@ -1,6 +1,8 @@
 # elixir-dev-anywhere-docker
-Develop elixir /phoenix applications in your browser from anywhere, using docker and noVNC
 
+What it is
+
+Develop elixir /phoenix applications in your browser from anywhere, using docker and noVNC
 Docker is mostly used to containerize applications for deployment into production. But development is a production environment also, from a certain viewpoint, and it can be handy to ship developmentcontainers.
   I don't like installing on my host with files being placed everywhere, not knowing if an eventual deinstall will completely remove
 everything. I want to be able to delete an application and know for sure it is removed completely. Docker gives that. Moreover you 
