@@ -65,4 +65,6 @@ For the noVNC part I used the following repo and made some small modifications: 
   https://hub.docker.com/r/jare/spacemacs/~/dockerfile/  The config should be in a (mutable) volume. Pointers for handy configs for elixir would be great.
 - Dynamic resize of the desktop inside the browser would be great. It seems to be built in in Kanaka's sources, see 
   https://github.com/kanaka/noVNC/pull/271 . I tried to use these by simply replacing my include folder with Kanaka's but got a js error in the browse and gave up for the moment. 
+- At the moment only one user can be logged in. This seems to be solved by Kanaka also https://github.com/kanaka/noVNC/issues/522 
+  maybe this is not so difficult. All in all it could prove worthwile to integrate Kanaka's project https://github.com/kanaka/noVNC.
 
