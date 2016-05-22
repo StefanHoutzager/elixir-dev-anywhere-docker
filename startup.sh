@@ -11,6 +11,10 @@
 # container via a web browser referral from a seperately authenticated 
 # page, so I don't want to leak password info via these variables
 
+#replace values in xorg.conf for virtual screen resolution by env vars set in d$
+sed -i -e "s/<virtual-height>/$VIRTUAL_HEIGHT/g" /etc/X11/xorg.conf
+sed -i -e "s/<virtual-width>/$VIRTUAL_WIDTH/g" /etc/X11/xorg.conf
+
 if [ ! -z $UBUNTUPASS ] 
 then
   /bin/echo "ubuntu:$UBUNTUPASS" | /usr/sbin/chpasswd
