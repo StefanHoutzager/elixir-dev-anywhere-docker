@@ -72,17 +72,3 @@ stopsignal=QUIT
 environment=DISPLAY=":1",HOME="/home/ubuntu"
 stdout_logfile=/var/log/lxterminal.log
 stderr_logfile=/var/log/lxterminal.err
-
-[program:eclipse]
-priority=30
-priority=15
-directory=/home/ubuntu
-command=/usr/bin/eclipse
-user=ubuntu
-autostart=true
-autorestart=false
-stopsignal=QUIT
-environment=DISPLAY=":1",HOME="/home/ubuntu"
-stdout_logfile=/var/log/eclipse.log
-stderr_logfile=/var/log/eclipse.err
-
