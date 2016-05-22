@@ -24,20 +24,18 @@ from a certain viewpoint, and it can be handy to ship developmentcontainers. I d
 4.  CD to you repo folder and git clone https://github.com/StefanHoutzager/elixir-dev-anywhere-docker.git
 
 5.  You have a elixir-dev-anywhere-docker folder in your repofolder now. Copy Dockerfile and docker-compose.yml from 
-    elixir-dev-anywhere-docker to your repo folder. There are a couple of ADD statements in the Dockerfile that put files from the elixir-dev-anywhere-docker folder on the host into your image, this way you make sure you ghave the original files in the repo.
+    elixir-dev-anywhere-docker to your repo folder. There are a couple of ADD statements in the Dockerfile that put files from the elixir-dev-anywhere-docker folder on the host into your image, this way you make sure you have the original files in the repo.
 
-6. Look for the string badpassword in the Dockerfile and replace it with the one you will use.
+6.  Look for the string badpassword in the Dockerfile and replace it with the ones you prefer use.
 
 7.  To enable encrypted connections, you need to (at a minimum) create a noVNC self.pem certificate file:
     https://github.com/kanaka/websockify/wiki/Encrypted-Connections, put it in elixir-dev-anywhere-docker/noVNC
 
 8.  Edit docker-compose.yml, replace each folder_name_in_container, volume_name_onhost with your choice. Edit further environment
     variables as you wish. If you uncomment #      ENABLE_HTTP: "Y" you can use http besides https in your URL, otherwise only https.
+    You can override VNC and UBUNTU passwords from the Dockerfile here if you wish, the vars are not mandatory. VIRTUAL_HEIGHT and VIRTUAL_WIDTH are mandatory env vars. They are filled in for my own screen resolution now, which is 1920X1080.  Note that screen resolution !== browseviewport resolution (except width).
 
-9.  I know the following is clumsy, the solution should be dynamic. See my wishlist below. If you have another display than 1920X1080 
-    you can edit the browser viewportsize in elixir-dev-anywhere-docker/xorg.conf before you build the image, look for Section "Screen" key Virtual and edit. Note that screen resolution !== browseviewport resolution (except width). 
-
-10. Enter your repo folder and build the image with sudo docker build -t stefan/phoenix . | tee build.log
+9.  Enter your repo folder and build the image with sudo docker build -t stefan/phoenix . | tee build.log
 
 11. If the build has been succesfull start the app with sudo docker-compose up -d  
 
