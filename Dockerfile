@@ -70,7 +70,6 @@ RUN apt-get install -y --force-yes --no-install-recommends supervisor \
     sudo \
     vim-tiny \
     net-tools \
-
     lxde \
     x11vnc \
     xvfb \
@@ -118,6 +117,7 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-k
 
 RUN apt-get update && apt-get install -y \
     nano \
+    postgresql-client \
     pgadmin3 --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["/startup.sh"]
