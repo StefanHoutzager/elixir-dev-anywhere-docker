@@ -8,8 +8,8 @@ services:
       DATABASE_URL: postgres://rumbl:rumbl@db/rumbl_dev
       PORT: 5432
       MIX_ENV: "dev"
-      VIRTUAL_HEIGHT: 1920
-      VIRTUAL_WIDTH: 927
+      VIRTUAL_HEIGHT: 929
+      VIRTUAL_WIDTH: 1920
       UBUNTUPASS: "ubuntupw"
       VNCPASS: "vncpw"
     #  ENABLE_HTTP: "Y"
