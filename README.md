@@ -49,8 +49,8 @@ With this repository you can build a docker image that makes it possible to deve
 
 16. When you logged in sudo -i before you use iex
 
-17. Start intellij in the browser (right mouse should show a menu with an intellij item). This menu is configurable, if you want uncomment 
-    #      - /var/lib/docker/volumes/openbox/_data:/home/ubuntu/.config/openbox 
+17. Start intellij in the browser (right mouse should show a menu with an intellij item). This menu is configurable, if you want uncomment the following line
+    /var/lib/docker/volumes/openbox/_data:/home/ubuntu/.config/openbox 
     in docker-compose.yml, create the folder on your host and copy the contents of elixir-dev-anywhere-docker/openbox-config/.config/openbox into it
 
 18. Follow instruction here: https://github.com/KronicDeth/intellij-elixir to configure
