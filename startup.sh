@@ -34,6 +34,9 @@ do
     . $f
 done
 
+chown -R ubuntu /home/ubuntu 
+chgrp -R ubuntu /home/ubuntu
+
 #  ;while [ 1 ]; do
 /bin/bash
 #  done

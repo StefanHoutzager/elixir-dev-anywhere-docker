@@ -10,9 +10,10 @@ services:
       MIX_ENV: "dev"
       VIRTUAL_HEIGHT: 929
       VIRTUAL_WIDTH: 1920
-      UBUNTUPASS: "ubuntupw"
-      VNCPASS: "vncpw"
-    #  ENABLE_HTTP: "Y"
+#       UBUNTUPASS: "override"
+#       VNCPASS: "also override"
+      ENABLE_HTTP: "Y"
+      DISPLAY: $DISPLAY
     links:
       - postgres
     ports:
@@ -20,6 +21,9 @@ services:
       - 6080:6080
     volumes:
       - /var/lib/docker/volumes/volume_name_onhost/_data:/folder_name_in_container
+      - /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.2/config:/home/ubuntu/.IdeaIC2016.2/config
+#      - /var/lib/docker/volumes/openbox/_data:/home/ubuntu/.config/openbox
+      - /tmp/.X11-unix:/tmp/.X11-unix
     stdin_open: true 
   postgres:
     image: postgres

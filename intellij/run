@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+function delayedPluginInstall {
+    sudo mkdir -p /home/ubuntu/.IdeaIC2016.2/config/plugins
+    sudo mkdir -p /home/ubuntu/.IdeaIC2016.2/config/options
+    sudo chown ubuntu:ubuntu -R /home/ubuntu/.IdeaIC2016.2
+
+    cd /home/ubuntu/.IdeaIC2016.2/config/plugins/
+
+    echo 'Installing Markdown support plugin'
+    wget https://plugins.jetbrains.com/files/7793/25156/markdown-2016.1.20160405.zip -O markdown.zip -q && unzip -q markdown.zip && rm markdown.zip
+
+}
+
+if [ ! -d /home/ubuntu/.IdeaIC2016.2/config/plugins/intellij-elixir ]; then
+    # We are running with a non-Docker contained volume for IntelliJ prefs so we need to setup the plugin again
+    delayedPluginInstall
+fi
+
+if [ -d /home/ubuntu/.IdeaIC2016.2 ]; then
+    # Ensure proper permissions
+    sudo chown ubuntu:ubuntu -R /home/ubuntu/.IdeaIC2016.2
+fi
+
+exec /opt/intellij/bin/idea.sh
+

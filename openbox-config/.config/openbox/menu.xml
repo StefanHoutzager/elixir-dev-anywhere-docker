@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openbox_menu xmlns="http://openbox.org/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://openbox.org/                 file:///usr/share/openbox/menu.xsd">
+        <menu id="root-menu" label="Openbox 3">
+                <item label="Intellij IDE">
+                        <action name="Execute">
+                                <execute>/usr/local/bin/intellij</execute>
+                        </action>
+                </item>
+                <item label="Openbox menu">
+                        <action name="Execute">
+                                <execute>obmenu</execute>
+                        </action>
+                </item>
+                <item label="Openbox conf">
+                        <action name="Execute">
+                                <execute>obconf</execute>
+                        </action>
+                </item>
+                <item label="Terminal emulator">
+                        <action name="Execute">
+                                <execute>x-terminal-emulator</execute>
+                        </action>
+                </item>
+                <!-- This requires the presence of the 'menu' package to work -->
+                <item label="Web browser">
+                        <action name="Execute">
+                                <execute>x-www-browser</execute>
+                        </action>
+                </item>
+                <menu id="/Debian"/>
+                <separator/>
+                <menu id="client-list-menu"/>
+                <separator/>
+                <item label="Reconfigure">
+                        <action name="Reconfigure"/>
+                </item>
+                <item label="Restart">
+                        <action name="Restart"/>
+                </item>
+                <separator/>
+                <item label="Exit">
+                        <action name="Exit"/>
+                </item>
+        </menu>
+</openbox_menu>
+
