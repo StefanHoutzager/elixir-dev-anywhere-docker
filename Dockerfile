@@ -4,7 +4,6 @@ MAINTAINER Stefan Houtzager <stefan.houtzager@gmail.com>
 ENV DEBIAN_FRONTEND noninteractive
 ENV REFRESHED_AT 29-08-2016
 ENV TERM xterm
-ENV HOME /root
 
 WORKDIR /
 
@@ -40,10 +39,6 @@ RUN wget -q https://github.com/elixir-lang/elixir/releases/download/v1.3.2/Preco
 
 WORKDIR /
 
-# Install local Elixir hex and rebar
-RUN mix local.hex --force && \
-    mix local.rebar --force && \
-    mix hex.info
 # install Node.js (>= 5.0.0) and NPM in order to satisfy brunch.io dependencies
 RUN curl -sL https://deb.nodesource.com/setup_5.x | bash - && apt-get -y install nodejs inotify-tools
 
@@ -99,6 +94,13 @@ ADD elixir-dev-anywhere-docker/openbox-config /openbox-config
 RUN cp -r /openbox-config/.config ~ubuntu/
 RUN chown -R ubuntu ~ubuntu/.config ; chgrp -R ubuntu ~ubuntu/.config
 RUN rm -r /openbox-config
+
+ENV HOME=/home/ubuntu
+
+# Install local Elixir hex and rebar, in $HOME  
+RUN mix local.hex --force && \
+    mix local.rebar --force && \
+    mix hex.info
 
 # intellij
 RUN sed 's/main$/main universe/' -i /etc/apt/sources.list && \

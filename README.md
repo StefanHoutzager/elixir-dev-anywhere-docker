@@ -42,22 +42,17 @@ With this repository you can build a docker image that makes it possible to deve
 
 13. If you want to check the status of the containers: sudo docker ps -a
 
-14. Give the containers a couple of seconds to start al processes before you go to the noVNC page in your browser, otherwise the 
-    port might prove idle.
+14. Point your browser to https://your external ip:6080/vnc.html (or use http), or use the inet address of the router (ifconfig)
 
-15. Point your browser to https://your external ip:6080/vnc.html (or use http), or use the inet address of the router (ifconfig)
-
-16. When you logged in sudo -i before you use iex
-
-17. Start intellij in the browser (right mouse should show a menu with an intellij item). This menu is configurable, if you want uncomment the following line
+15. Start intellij in the browser (right mouse should show a menu with an intellij item). This menu is configurable, if you want uncomment the following line
     /var/lib/docker/volumes/openbox/_data:/home/ubuntu/.config/openbox 
     in docker-compose.yml, create the folder on your host and copy the contents of elixir-dev-anywhere-docker/openbox-config/.config/openbox into it
 
-18. Follow instruction here: https://github.com/KronicDeth/intellij-elixir to configure
+16. Follow instruction here: https://github.com/KronicDeth/intellij-elixir to configure
 
-19. Configure your IDE settings (the theme shown in the jpg contained in this github project f.e. is darcula) https://www.jetbrains.com/help/idea/2016.2/project-and-ide-settings.html
+17. Configure your IDE settings (the theme shown in the jpg contained in this github project f.e. is darcula) https://www.jetbrains.com/help/idea/2016.2/project-and-ide-settings.html
 
-20. Close intellij and copy the IDE setting from the running docker-container to the volume on your host (sudo -i to get rights): 
+18. Close intellij and copy the IDE setting from the running docker-container to the volume on your host (sudo -i to get rights): 
 docker cp containernAME>:/home/ubuntu/.IdeaIC2016.2/config /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.2  
 
 #Credits
@@ -71,7 +66,6 @@ All the people that built elixir, phoenix and the intellij-elixir plugin of cour
 
 - The applications could be spread over more images to make them more reusable, some maybe with a small FROM image like alpine. My  
   docker knowledge is not enough to do this at the moment. There could be one image for noVNC + x11vncserver, one for intellij, one for pgadmin3, one for erlang/elixir/phoenix and one for postgres maybe. 
-- At the moment you have to start with sudo -i to have sufficient rights to develop and start phoenix.server. It would be nice if this is not needed anymore and your cd is the data-volume.
 - It would be nice to make the openbox theme configurable. Here you can find themes: https://www.box-look.org (look for openbox themes only). I shortly tried to make this work, but miss openbox knowledge 
 - Dynamic resize of the desktop inside the browser would be great. It seems to be built in in Kanaka's sources, see 
   https://github.com/kanaka/noVNC/pull/271 . I tried to use these by simply replacing my include folder with Kanaka's but got a js error in the browse and gave up for the moment. 
