@@ -36,7 +36,7 @@ With this repository you can build a docker image that makes it possible to deve
 
 9.  Enter your repo folder and build the image with sudo docker build -t stefan/phoenix . | tee build.log
 
-11. If the build has been succesfull start the app with sudo docker-compose up -d  
+11. If the build has been succesfull start the app with sudo docker-compose up -d   
 
 12. Note the containernames that show up in your terminal. You can use compose_postgres_1 as hostname when you start pgadmin3 later
 
@@ -51,14 +51,20 @@ With this repository you can build a docker image that makes it possible to deve
 16. Follow instruction here: https://github.com/KronicDeth/intellij-elixir to configure
 
 17. Configure your IDE settings (the theme shown in the jpg contained in this github project f.e. is darcula) https://www.jetbrains.com/help/idea/2016.2/project-and-ide-settings.html
+save the settings.jar in the default folder (file -> export settings)
 
 18. Close intellij and copy the IDE setting from the running docker-container to the volume on your host (sudo -i to get rights): 
 docker cp containernAME>:/home/ubuntu/.IdeaIC2016.2/config /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.2  
+
+19. Shutdown the running containers, remove the comment sign (#) in docker-compose.yml from the line - /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.2/config:/home/ubuntu/.IdeaIC2016.2/config
+and restart with sudo docker-compose up -d 
+
 
 #Credits
 
 For the noVNC part I used the following repo and made some small modifications: https://github.com/mccahill/docker-eclipse-novnc. 
 Interesting notes from Mark McCahill: https://gitlab.oit.duke.edu/mccahill/docker-novnc-template 
+The noVNC folder was taken frome https://github.com/kanaka/noVNC on sept 6 2016
 
 All the people that built elixir, phoenix and the intellij-elixir plugin of course.
 
@@ -67,8 +73,5 @@ All the people that built elixir, phoenix and the intellij-elixir plugin of cour
 - The applications could be spread over more images to make them more reusable, some maybe with a small FROM image like alpine. My  
   docker knowledge is not enough to do this at the moment. There could be one image for noVNC + x11vncserver, one for intellij, one for pgadmin3, one for erlang/elixir/phoenix and one for postgres maybe. 
 - It would be nice to make the openbox theme configurable. Here you can find themes: https://www.box-look.org (look for openbox themes only). I shortly tried to make this work, but miss openbox knowledge 
-- Dynamic resize of the desktop inside the browser would be great. It seems to be built in in Kanaka's sources, see 
-  https://github.com/kanaka/noVNC/pull/271 . I tried to use these by simply replacing my include folder with Kanaka's but got a js error in the browse and gave up for the moment. 
-- At the moment only one user can be logged in. This seems to be solved by Kanaka also https://github.com/kanaka/noVNC/issues/522 
-  maybe this is not so difficult. All in all it could prove worthwile to integrate Kanaka's project https://github.com/kanaka/noVNC.
+- Make this fit for use with multiple users.
 
