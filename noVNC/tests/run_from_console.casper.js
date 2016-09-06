@@ -2,7 +2,7 @@ var Spooky = require('spooky');
 var path = require('path');
 
 var phantom_path = require('phantomjs').path;
-var casper_path = path.resolve(__dirname, 'node_modules/casperjs/bin/casperjs');
+var casper_path = path.resolve(__dirname, '../node_modules/casperjs/bin/casperjs');
 process.env.PHANTOMJS_EXECUTABLE = phantom_path;
 var casper_opts = {
   child: {
@@ -15,7 +15,19 @@ var casper_opts = {
   }
 };
 
-var provide_emitter = function(file_paths) {
+var provide_emitter = function(file_paths, debug_port) {
+  if (debug_port) {
+      casper_opts.child['remote-debugger-port'] = debug_port;
+      var debug_url = ('https://localhost:' + debug_port +
+                       '/webkit/inspector/inspector.html?page=');
+      console.info('[remote-debugger] Navigate to ' + debug_url + '1 and ' +
+                   'run `__run();` in the console to continue loading.' +
+                   '\n[remote-debugger] Navigate to ' + debug_url + '2 to ' +
+                   'view the actual page source.\n' +
+                   '[remote-debugger] Use the `debugger;` statement to ' +
+                   'trigger an initial breakpoint.');
+  }
+
   var spooky = new Spooky(casper_opts, function(err) {
     if (err) {
       if (err.stack) console.warn(err.stack);
@@ -26,7 +38,10 @@ var provide_emitter = function(file_paths) {
 
     file_paths.forEach(function(file_path, path_ind) {
       spooky.thenOpen('file://'+file_path);
-      spooky.then([{ path_ind: path_ind }, function() {
+      spooky.waitFor(function() {
+        return this.getGlobal('__mocha_done') === true;
+      },
+      [{ path_ind: path_ind }, function() {
         var res_json = {
           file_ind: path_ind
         };

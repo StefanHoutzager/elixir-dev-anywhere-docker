@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Copyright 2016 Joel Martin
+# Copyright 2016 Solly Ross
+# Licensed under MPL 2.0 or any later version (see LICENSE.txt)
+
 usage() {
     if [ "$*" ]; then
         echo "$*"
@@ -9,7 +13,7 @@ usage() {
     echo
     echo "Starts the WebSockets proxy and a mini-webserver and "
     echo "provides a cut-and-paste URL to go to."
-    echo 
+    echo
     echo "    --listen PORT         Port for proxy/webserver to listen on"
     echo "                          Default: 6080"
     echo "    --vnc VNC_HOST:PORT   VNC server host:port proxy target"
@@ -22,7 +26,8 @@ usage() {
 }
 
 NAME="$(basename $0)"
-HERE="$(cd "$(dirname "$0")" && pwd)"
+REAL_NAME="$(readlink -f $0)"
+HERE="$(cd "$(dirname "$REAL_NAME")" && pwd)"
 PORT="6080"
 VNC_DEST="localhost:5900"
 CERT=""
@@ -64,7 +69,7 @@ done
 which netstat >/dev/null 2>&1 \
     || die "Must have netstat installed"
 
-netstat -ltn | grep -qs "${PORT} .*LISTEN" \
+netstat -ltn | grep -qs ":${PORT} .*LISTEN" \
     && die "Port ${PORT} in use. Try --listen PORT"
 
 trap "cleanup" TERM QUIT INT EXIT
@@ -101,15 +106,39 @@ else
     echo "Warning: could not find self.pem"
 fi
 
-echo "Starting webserver and WebSockets proxy on port ${PORT}"
+# try to find websockify (prefer local, try global, then download local)
+if [[ -e ${HERE}/websockify ]]; then
+    WEBSOCKIFY=${HERE}/websockify/run
 
-if [ -z "$ENABLE_HTTP" ]
-then
-   ${HERE}/websockify --web ${WEB} ${CERT:+--cert ${CERT}} ${PORT} ${VNC_DEST} --ssl-only &
+    if [[ ! -x $WEBSOCKIFY ]]; then
+        echo "The path ${HERE}/websockify exists, but $WEBSOCKIFY either does not exist or is not executable."
+        echo "If you intended to use an installed websockify package, please remove ${HERE}/websockify."
+        exit 1
+    fi
+
+    echo "Using local websockify at $WEBSOCKIFY"
 else
-   ${HERE}/websockify --web ${WEB} ${PORT} ${VNC_DEST} &
+    WEBSOCKIFY=$(which websockify 2>/dev/null)
+
+    if [[ $? -ne 0 ]]; then
+        echo "No installed websockify, attempting to clone websockify..."
+        WEBSOCKIFY=${HERE}/websockify/run
+        git clone https://github.com/kanaka/websockify ${HERE}/websockify
+
+        if [[ ! -e $WEBSOCKIFY ]]; then
+            echo "Unable to locate ${HERE}/websockify/run after downloading"
+            exit 1
+        fi
+
+        echo "Using local websockify at $WEBSOCKIFY"
+    else
+        echo "Using installed websockify at $WEBSOCKIFY"
+    fi
 fi
 
+echo "Starting webserver and WebSockets proxy on port ${PORT}"
+#${HERE}/websockify --web ${WEB} ${CERT:+--cert ${CERT}} ${PORT} ${VNC_DEST} &
+${WEBSOCKIFY} --web ${WEB} ${CERT:+--cert ${CERT}} ${PORT} ${VNC_DEST} &
 proxy_pid="$!"
 sleep 1
 if ! ps -p ${proxy_pid} >/dev/null; then
@@ -119,7 +148,7 @@ if ! ps -p ${proxy_pid} >/dev/null; then
 fi
 
 echo -e "\n\nNavigate to this URL:\n"
-echo -e "    https://$(hostname):${PORT}/vnc.html?host=$(hostname)&port=${PORT}\n"
+echo -e "    http://$(hostname):${PORT}/vnc.html?host=$(hostname)&port=${PORT}\n"
 echo -e "Press Ctrl-C to exit\n\n"
 
 wait ${proxy_pid}

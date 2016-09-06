@@ -1,5 +1,6 @@
 ## noVNC: HTML5 VNC Client
 
+[![Build Status](https://travis-ci.org/kanaka/noVNC.svg?branch=master)](https://travis-ci.org/kanaka/noVNC)
 
 ### Description
 
@@ -28,7 +29,7 @@ discussion group</a>
 Bugs and feature requests can be submitted via [github
 issues](https://github.com/kanaka/noVNC/issues). If you are looking
 for a place to start contributing to noVNC, a good place to start
-would be the issues that are have marked as
+would be the issues that are marked as
 ["patchwelcome"](https://github.com/kanaka/noVNC/issues?labels=patchwelcome).
 
 If you want to show appreciation for noVNC you could donate to a great
@@ -68,11 +69,7 @@ See more screenshots <a href="http://kanaka.github.com/noVNC/screenshots.html">h
 * HTML5 Canvas (with createImageData): Chrome, Firefox 3.6+, iOS
   Safari, Opera 11+, Internet Explorer 9+, etc.
 
-* HTML5 WebSockets: For browsers that do not have builtin
-  WebSockets support, the project includes
-  <a href="http://github.com/gimite/web-socket-js">web-socket-js</a>,
-  a WebSockets emulator using Adobe Flash. iOS 4.2+ has built-in
-  WebSocket support.
+* HTML5 WebSockets and Typed Arrays
 
 * Fast Javascript Engine: this is not strictly a requirement, but
   without a fast Javascript engine, noVNC might be painfully slow.
@@ -129,9 +126,7 @@ use a WebSockets to TCP socket proxy. There is a python proxy included
     * tight encoding : Michael Tinglof (Mercuri.ca)
 
 * Included libraries:
-    * web-socket-js : Hiroshi Ichikawa (github.com/gimite/web-socket-js)
     * as3crypto : Henri Torgemane (code.google.com/p/as3crypto)
     * base64 : Martijn Pieters (Digital Creations 2), Samuel Sieb (sieb.net)
-    * jsunzip : Erik Moller (github.com/operasoftware/jsunzip),
-    * tinflate : Joergen Ibsen (ibsensoftware.com)
     * DES : Dave Zimmerman (Widget Workshop), Jef Poskanzer (ACME Labs)
+    * Pako : Vitaly Puzrin (https://github.com/nodeca/pako)
