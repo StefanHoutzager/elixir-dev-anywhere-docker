@@ -42,7 +42,6 @@ WORKDIR /
 # install Node.js (>= 5.0.0) and NPM in order to satisfy brunch.io dependencies
 RUN curl -sL https://deb.nodesource.com/setup_5.x | bash - && apt-get -y install nodejs inotify-tools
 
-RUN mix archive.install https://github.com/phoenixframework/archives/raw//master/phoenix_new.ez --force
 # setup our Ubuntu sources (ADD breaks caching)
 RUN echo "deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse\n\
 deb http://archive.ubuntu.com/ubuntu trusty-updates main restricted universe multiverse\n\
@@ -97,8 +96,9 @@ RUN rm -r /openbox-config
 
 ENV HOME=/home/ubuntu
 
-# Install local Elixir hex and rebar, in $HOME  
-RUN mix local.hex --force && \
+# Install phoenix, local Elixir hex and rebar (in ENV HOME)
+RUN mix archive.install --force https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez && \  
+    mix local.hex --force && \
     mix local.rebar --force && \
     mix hex.info
 
