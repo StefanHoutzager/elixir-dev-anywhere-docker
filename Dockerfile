@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 MAINTAINER Stefan Houtzager <stefan.houtzager@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV REFRESHED_AT 22-09-2016
+ENV REFRESHED_AT 14-11-2016
 ENV TERM xterm
 
 WORKDIR /
@@ -29,7 +29,7 @@ RUN echo "deb http://packages.erlang-solutions.com/ubuntu trusty contrib" >> /et
 
 # Download and Install Specific Version of Elixir
 WORKDIR /elixir
-RUN wget -q https://github.com/elixir-lang/elixir/releases/download/v1.3.3/Precompiled.zip && \
+RUN wget -q https://github.com/elixir-lang/elixir/releases/download/v1.3.4/Precompiled.zip && \
     unzip Precompiled.zip && \
     rm -f Precompiled.zip && \
     ln -s /elixir/bin/elixirc /usr/local/bin/elixirc && \
@@ -126,7 +126,7 @@ ADD elixir-dev-anywhere-docker/intellij-elixir.zip /home/ubuntu/.IdeaIC2016.2/co
 RUN chmod +x /usr/local/bin/intellij
 
 RUN echo 'Downloading IntelliJ IDEA' && \
-    wget https://download.jetbrains.com/idea/ideaIC-2016.2.tar.gz -O /tmp/intellij.tar.gz -q && \
+    wget https://download.jetbrains.com/idea/ideaIC-2016.2.5.tar.gz -O /tmp/intellij.tar.gz -q && \
     echo 'Installing IntelliJ IDEA' && \
     mkdir -p /opt/intellij && \
     tar -xf /tmp/intellij.tar.gz --strip-components=1 -C /opt/intellij && \
