@@ -291,18 +291,25 @@
 
             var evt = (e ? e : window.event);
             var pos = Util.getEventPosition(e, this._target, this._scale);
-            var wheelData = evt.detail ? evt.detail * -1 : evt.wheelDelta / 40;
-            var bmask;
-            if (wheelData > 0) {
-                bmask = 1 << 3;
-            } else {
-                bmask = 1 << 4;
-            }
 
             if (this._onMouseButton) {
-                this._onMouseButton(pos.x, pos.y, 1, bmask);
-                this._onMouseButton(pos.x, pos.y, 0, bmask);
+                if (evt.deltaX < 0) {
+                    this._onMouseButton(pos.x, pos.y, 1, 1 << 5);
+                    this._onMouseButton(pos.x, pos.y, 0, 1 << 5);
+                } else if (evt.deltaX > 0) {
+                    this._onMouseButton(pos.x, pos.y, 1, 1 << 6);
+                    this._onMouseButton(pos.x, pos.y, 0, 1 << 6);
+                }
+
+                if (evt.deltaY < 0) {
+                    this._onMouseButton(pos.x, pos.y, 1, 1 << 3);
+                    this._onMouseButton(pos.x, pos.y, 0, 1 << 3);
+                } else if (evt.deltaY > 0) {
+                    this._onMouseButton(pos.x, pos.y, 1, 1 << 4);
+                    this._onMouseButton(pos.x, pos.y, 0, 1 << 4);
+                }
             }
+
             Util.stopEvent(e);
             return false;
         },
@@ -346,19 +353,17 @@
         grab: function () {
             var c = this._target;
 
-            if ('ontouchstart' in document.documentElement) {
+            if (Util.isTouchDevice) {
                 c.addEventListener('touchstart', this._eventHandlers.mousedown);
                 window.addEventListener('touchend', this._eventHandlers.mouseup);
                 c.addEventListener('touchend', this._eventHandlers.mouseup);
                 c.addEventListener('touchmove', this._eventHandlers.mousemove);
-            } else {
-                c.addEventListener('mousedown', this._eventHandlers.mousedown);
-                window.addEventListener('mouseup', this._eventHandlers.mouseup);
-                c.addEventListener('mouseup', this._eventHandlers.mouseup);
-                c.addEventListener('mousemove', this._eventHandlers.mousemove);
-                c.addEventListener((Util.Engine.gecko) ? 'DOMMouseScroll' : 'mousewheel',
-                              this._eventHandlers.mousewheel);
             }
+            c.addEventListener('mousedown', this._eventHandlers.mousedown);
+            window.addEventListener('mouseup', this._eventHandlers.mouseup);
+            c.addEventListener('mouseup', this._eventHandlers.mouseup);
+            c.addEventListener('mousemove', this._eventHandlers.mousemove);
+            c.addEventListener('wheel', this._eventHandlers.mousewheel);
 
             /* Work around right and middle click browser behaviors */
             document.addEventListener('click', this._eventHandlers.mousedisable);
@@ -368,19 +373,17 @@
         ungrab: function () {
             var c = this._target;
 
-            if ('ontouchstart' in document.documentElement) {
+            if (Util.isTouchDevice) {
                 c.removeEventListener('touchstart', this._eventHandlers.mousedown);
                 window.removeEventListener('touchend', this._eventHandlers.mouseup);
                 c.removeEventListener('touchend', this._eventHandlers.mouseup);
                 c.removeEventListener('touchmove', this._eventHandlers.mousemove);
-            } else {
-                c.removeEventListener('mousedown', this._eventHandlers.mousedown);
-                window.removeEventListener('mouseup', this._eventHandlers.mouseup);
-                c.removeEventListener('mouseup', this._eventHandlers.mouseup);
-                c.removeEventListener('mousemove', this._eventHandlers.mousemove);
-                c.removeEventListener((Util.Engine.gecko) ? 'DOMMouseScroll' : 'mousewheel',
-                                 this._eventHandlers.mousewheel);
             }
+            c.removeEventListener('mousedown', this._eventHandlers.mousedown);
+            window.removeEventListener('mouseup', this._eventHandlers.mouseup);
+            c.removeEventListener('mouseup', this._eventHandlers.mouseup);
+            c.removeEventListener('mousemove', this._eventHandlers.mousemove);
+            c.removeEventListener('wheel', this._eventHandlers.mousewheel);
 
             /* Work around right and middle click browser behaviors */
             document.removeEventListener('click', this._eventHandlers.mousedisable);

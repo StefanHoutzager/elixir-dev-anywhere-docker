@@ -204,14 +204,18 @@ Util.getPosition = function(obj) {
             'width': objPosition.width, 'height': objPosition.height};
 };
 
+Util.getPointerEvent = function (e) {
+    var evt;
+    evt = (e ? e : window.event);
+    evt = (evt.changedTouches ? evt.changedTouches[0] : evt.touches ? evt.touches[0] : evt);
+    return evt;
+};
 
 // Get mouse event position in DOM element
 Util.getEventPosition = function (e, obj, scale) {
     "use strict";
     var evt, docX, docY, pos;
-    //if (!e) evt = window.event;
-    evt = (e ? e : window.event);
-    evt = (evt.changedTouches ? evt.changedTouches[0] : evt.touches ? evt.touches[0] : evt);
+    evt = Util.getPointerEvent(e);
     if (evt.pageX || evt.pageY) {
         docX = evt.pageX;
         docY = evt.pageY;
@@ -236,6 +240,18 @@ Util.stopEvent = function (e) {
     e.stopPropagation();
     e.preventDefault();
 };
+
+// Touch detection
+Util.isTouchDevice = ('ontouchstart' in document.documentElement) ||
+                     // requried for Chrome debugger
+                     (document.ontouchstart !== undefined) ||
+                     // required for MS Surface
+                     (navigator.maxTouchPoints > 0) ||
+                     (navigator.msMaxTouchPoints > 0);
+window.addEventListener('touchstart', function onFirstTouch() {
+    Util.isTouchDevice = true;
+    window.removeEventListener('touchstart', onFirstTouch, false);
+}, false);
 
 Util._cursor_uris_supported = null;
 
@@ -325,7 +341,7 @@ Util.Features = {xpath: !!(document.evaluate), air: !!(window.runtime), query: !
         'presto': detectPresto(),
         'trident': detectTrident(),
         'webkit': detectInitialWebkit(),
-        'gecko': detectGecko(),
+        'gecko': detectGecko()
     };
 
     if (Util.Engine.webkit) {
@@ -349,5 +365,85 @@ Util.Flash = (function () {
     version = v.match(/\d+/g);
     return {version: parseInt(version[0] || 0 + '.' + version[1], 10) || 0, build: parseInt(version[2], 10) || 0};
 }());
+
+
+Util.Localisation = {
+    defaultLanguage: 'en-GB',
+
+    /*
+     * Not all languages have been translated
+     * Some countries prefer a certain language
+     */
+    supportedLanguages: {
+        'en':    'en-GB',
+        'en-GB': 'en-GB',
+        'en-US': 'en-GB',
+        'nl':    'nl-NL',
+        'nl-NL': 'nl-NL',
+        'nl-BE': 'nl-NL',
+        'de':    'de-DE',
+        'de-DE': 'de-DE',
+        'sv-SE': 'sv-SE',
+        'sv':    'sv-SE',
+        'el':    'el-GR',
+        'el-GR': 'el-GR'
+    },
+
+    // Get language code from browser and verify it
+    getLanguageCode: function () {
+        var languageCode = Util.Localisation.getUserPreferredLanguage();
+        for (var index = 0; index < languageCode.length; index++) {
+            var supportedLanguageCode = Util.Localisation.getSupportedLanguageCode(languageCode[index]);
+            if (supportedLanguageCode) {
+                return supportedLanguageCode;
+            }
+        }
+
+        return Util.Localisation.defaultLanguage;
+    },
+
+    /*
+    * Retrieve user preferred languages
+    * Navigator.languages only available in Chrome (32+) and FireFox (32+)
+    * Fall back to navigator.language for other browsers
+    */
+    getUserPreferredLanguage: function () {
+        if (typeof window.navigator.languages == 'object') {
+            return window.navigator.languages;
+        } else {
+            var userLang = navigator.language || navigator.userLanguage;
+            return [userLang];
+        }
+    },
+
+    /*
+    * Verify if languagecode is supported
+    * Return the languagecode of the language to use or null if not available
+    */
+    getSupportedLanguageCode: function (languageCode) {
+        var supportedLanguages = Util.Localisation.supportedLanguages;
+
+        for (var key in supportedLanguages) {
+            if (supportedLanguages.hasOwnProperty(key)) {
+                if (key === languageCode) {
+                    // Return the supported language or good alternative
+                    return supportedLanguages[key];
+                }
+            }
+        }
+
+        // LanguageCode not supported
+        return null;
+    },
+
+    // Retrieve localised text
+    get: function (id) {
+        if (typeof Language !== 'undefined' && Language[id]) {
+            return Language[id];
+        } else {
+            return id;
+        }
+    }
+};
 
 /* [module] export default Util; */
