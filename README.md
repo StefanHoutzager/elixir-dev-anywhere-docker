@@ -50,13 +50,13 @@ With this repository you can build a docker image that makes it possible to deve
 
 16. Follow instruction here: https://github.com/KronicDeth/intellij-elixir to configure
 
-17. Configure your IDE settings (the theme shown in the jpg contained in this github project f.e. is darcula) https://www.jetbrains.com/help/idea/2016.2/project-and-ide-settings.html
+17. Configure your IDE settings (the theme shown in the jpg contained in this github project f.e. is darcula) https://www.jetbrains.com/help/idea/2016.3/project-and-ide-settings.html
 save the settings.jar in the default folder (file -> export settings)
 
 18. Close intellij and copy the IDE setting from the running docker-container to the volume on your host (sudo -i to get rights): 
-docker cp containernAME>:/home/ubuntu/.IdeaIC2016.2/config /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.2  
+docker cp your_containername:/home/ubuntu/.IdeaIC2016.3/config /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.3  
 
-19. Shutdown the running containers, remove the comment sign (#) in docker-compose.yml from the line - /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.2/config:/home/ubuntu/.IdeaIC2016.2/config
+19. Shutdown the running containers, remove the comment sign (#) in docker-compose.yml from the line - /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.3/config:/home/ubuntu/.IdeaIC2016.3/config
 and restart with sudo docker-compose up -d 
 
 
