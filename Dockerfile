@@ -115,25 +115,25 @@ RUN sed 's/main$/main universe/' -i /etc/apt/sources.list && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
 
-RUN mkdir -p /home/ubuntu/.IdeaIC2016.2/config/options && \
-    mkdir -p /home/ubuntu/.IdeaIC2016.2/config/plugins
+RUN mkdir -p /home/ubuntu/.IdeaIC2016.3/config/options && \
+    mkdir -p /home/ubuntu/.IdeaIC2016.3/config/plugins
 
-ADD elixir-dev-anywhere-docker/jdk.table.xml /home/ubuntu/.IdeaIC2016.2/config/options/jdk.table.xml
+ADD elixir-dev-anywhere-docker/jdk.table.xml /home/ubuntu/.IdeaIC2016.3/config/options/jdk.table.xml
 ADD elixir-dev-anywhere-docker/jdk.table.xml /home/ubuntu/.jdk.table.xml
 ADD elixir-dev-anywhere-docker/intellij/run /usr/local/bin/intellij
-ADD elixir-dev-anywhere-docker/intellij-elixir.zip /home/ubuntu/.IdeaIC2016.2/config/plugins/intellij-elixir.zip
+ADD elixir-dev-anywhere-docker/intellij-elixir.zip /home/ubuntu/.IdeaIC2016.3/config/plugins/intellij-elixir.zip
 
 RUN chmod +x /usr/local/bin/intellij
 
 RUN echo 'Downloading IntelliJ IDEA' && \
-    wget https://download.jetbrains.com/idea/ideaIC-2016.2.5.tar.gz -O /tmp/intellij.tar.gz -q && \
+    wget https://download.jetbrains.com/idea/ideaIC-2016.3.6.tar.gz -O /tmp/intellij.tar.gz -q && \
     echo 'Installing IntelliJ IDEA' && \
     mkdir -p /opt/intellij && \
     tar -xf /tmp/intellij.tar.gz --strip-components=1 -C /opt/intellij && \
     rm /tmp/intellij.tar.gz
 
 RUN echo 'Installing Elixir plugin' && \
-    cd /home/ubuntu/.IdeaIC2016.2/config/plugins/ && \
+    cd /home/ubuntu/.IdeaIC2016.3/config/plugins/ && \
     unzip -q intellij-elixir.zip && \
     rm intellij-elixir.zip
 
