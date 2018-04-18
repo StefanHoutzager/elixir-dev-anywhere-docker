@@ -1,8 +1,9 @@
-// requires local modules: util
-/* jshint expr: true */
-
 var assert = chai.assert;
 var expect = chai.expect;
+
+import * as Log from '../core/util/logging.js';
+
+import sinon from '../vendor/sinon.js';
 
 describe('Utils', function() {
     "use strict";
@@ -10,47 +11,50 @@ describe('Utils', function() {
     describe('logging functions', function () {
         beforeEach(function () {
             sinon.spy(console, 'log');
+            sinon.spy(console, 'debug');
             sinon.spy(console, 'warn');
             sinon.spy(console, 'error');
             sinon.spy(console, 'info');
         });
 
         afterEach(function () {
-           console.log.restore();
-           console.warn.restore();
-           console.error.restore();
-           console.info.restore();
+            console.log.restore();
+            console.debug.restore();
+            console.warn.restore();
+            console.error.restore();
+            console.info.restore();
+            Log.init_logging();
         });
 
         it('should use noop for levels lower than the min level', function () {
-            Util.init_logging('warn');
-            Util.Debug('hi');
-            Util.Info('hello');
+            Log.init_logging('warn');
+            Log.Debug('hi');
+            Log.Info('hello');
             expect(console.log).to.not.have.been.called;
         });
 
-        it('should use console.log for Debug', function () {
-            Util.init_logging('debug');
-            Util.Debug('dbg');
-            expect(console.log).to.have.been.calledWith('dbg');
+        it('should use console.debug for Debug', function () {
+            Log.init_logging('debug');
+            Log.Debug('dbg');
+            expect(console.debug).to.have.been.calledWith('dbg');
         });
-        
+
         it('should use console.info for Info', function () {
-            Util.init_logging('debug');
-            Util.Info('inf');
+            Log.init_logging('debug');
+            Log.Info('inf');
             expect(console.info).to.have.been.calledWith('inf');
         });
 
         it('should use console.warn for Warn', function () {
-            Util.init_logging('warn');
-            Util.Warn('wrn');
+            Log.init_logging('warn');
+            Log.Warn('wrn');
             expect(console.warn).to.have.been.called;
             expect(console.warn).to.have.been.calledWith('wrn');
         });
 
         it('should use console.error for Error', function () {
-            Util.init_logging('error');
-            Util.Error('err');
+            Log.init_logging('error');
+            Log.Error('err');
             expect(console.error).to.have.been.called;
             expect(console.error).to.have.been.calledWith('err');
         });

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="noVNC_loading">
 <head>
 
     <!--
@@ -11,9 +11,9 @@
     This file is licensed under the 2-Clause BSD license (see LICENSE.txt).
 
     Connect parameters are provided in query string:
-        http://example.com/?host=HOST&port=PORT&encrypt=1&true_color=1
+        http://example.com/?host=HOST&port=PORT&encrypt=1
     or the fragment:
-        http://example.com/#host=HOST&port=PORT&encrypt=1&true_color=1
+        http://example.com/#host=HOST&port=PORT&encrypt=1
     -->
     <title>noVNC</title>
 
@@ -37,8 +37,9 @@
     <link rel="icon" sizes="144x144" type="image/png" href="app/images/icons/novnc-144x144.png">
     <link rel="icon" sizes="152x152" type="image/png" href="app/images/icons/novnc-152x152.png">
     <link rel="icon" sizes="192x192" type="image/png" href="app/images/icons/novnc-192x192.png">
-    <link rel="icon" sizes="512x512" type="image/png" href="app/images/icons/novnc-512x512.png">
+    <!-- Firefox currently mishandles SVG, see #1419039
     <link rel="icon" sizes="any" type="image/svg+xml" href="app/images/icons/novnc-icon.svg">
+    -->
     <!-- Repeated last so that legacy handling will pick this -->
     <link rel="icon" sizes="16x16" type="image/png" href="app/images/icons/novnc-16x16.png">
 
@@ -54,17 +55,45 @@
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="app/styles/base.css" />
-    <link rel="alternate stylesheet" href="app/styles/black.css" TITLE="Black" />
-    <link rel="alternate stylesheet" href="app/styles/blue.css" TITLE="Blue" />
 
     <!--
     <script type='text/javascript'
         src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
     -->
 
+    <!-- this is included as a normal file in order to catch script-loading errors as well -->
+    <script type="text/javascript" src="app/error-handler.js"></script>
+
+    <!-- begin scripts -->
+    <!-- promise polyfills promises for IE11 -->
+    <script src="vendor/promise.js"></script>
+    <!-- ES2015/ES6 modules polyfill -->
+    <script type="module">
+        window._noVNC_has_module_support = true;
+    </script>
+    <script>
+        window.addEventListener("load", function() {
+            if (window._noVNC_has_module_support) return;
+            var loader = document.createElement("script");
+            loader.src = "vendor/browser-es-module-loader/dist/browser-es-module-loader.js";
+            document.head.appendChild(loader);
+        });
+    </script>
+    <!-- actual script modules -->
+    <script type="module" crossorigin="anonymous" src="app/ui.js"></script>
+    <!-- end scripts -->
 </head>
 
 <body>
+
+    <div id="noVNC_fallback_error" class="noVNC_center">
+        <div>
+            <div>noVNC encountered an error:</div>
+            <br>
+            <div id="noVNC_fallback_errormsg"></div>
+        </div>
+    </div>
+
     <!-- noVNC Control Bar -->
     <div id="noVNC_control_bar_anchor" class="noVNC_vcenter">
 
@@ -73,7 +102,7 @@
 
             <div class="noVNC_scroll">
 
-            <h1 class="noVNC_logo"><span>no</span><br />VNC</h1>
+            <h1 class="noVNC_logo" translate="no"><span>no</span><br />VNC</h1>
 
             <!-- Drag/Pan the viewport -->
             <input type="image" alt="viewport drag" src="app/images/drag.svg"
@@ -125,18 +154,18 @@
                 </div>
             </div>
 
-            <!-- XVP Shutdown/Reboot -->
+            <!-- Shutdown/Reboot -->
             <input type="image" alt="Shutdown/Reboot" src="app/images/power.svg"
-                id="noVNC_xvp_button" class="noVNC_button"
+                id="noVNC_power_button" class="noVNC_button"
                 title="Shutdown/Reboot..." />
             <div class="noVNC_vcenter">
-            <div id="noVNC_xvp" class="noVNC_panel">
+            <div id="noVNC_power" class="noVNC_panel">
                 <div class="noVNC_heading">
                     <img src="app/images/power.svg"> Power
                 </div>
-                <input type="button" id="noVNC_xvp_shutdown_button" value="Shutdown" />
-                <input type="button" id="noVNC_xvp_reboot_button" value="Reboot" />
-                <input type="button" id="noVNC_xvp_reset_button" value="Reset" />
+                <input type="button" id="noVNC_shutdown_button" value="Shutdown" />
+                <input type="button" id="noVNC_reboot_button" value="Reboot" />
+                <input type="button" id="noVNC_reset_button" value="Reset" />
             </div>
             </div>
 
@@ -172,18 +201,6 @@
                         <img src="app/images/settings.svg"> Settings
                     </li>
                     <li>
-                        <label><input id="noVNC_setting_encrypt" type="checkbox" /> Encrypt</label>
-                    </li>
-                    <li>
-                        <label><input id="noVNC_setting_true_color" type="checkbox" checked /> True Color</label>
-                    </li>
-                    <li>
-                        <label><input id="noVNC_setting_cursor" type="checkbox" /> Local Cursor</label>
-                    </li>
-                    <li>
-                        <label><input id="noVNC_setting_clip" type="checkbox" /> Clip to Window</label>
-                    </li>
-                    <li>
                         <label><input id="noVNC_setting_shared" type="checkbox" /> Shared Mode</label>
                     </li>
                     <li>
@@ -191,142 +208,129 @@
                     </li>
                     <li><hr></li>
                     <li>
-                        <label for="noVNC_setting_path">Path:</label>
-                        <input id="noVNC_setting_path" type="input" value="websockify" />
+                        <label><input id="noVNC_setting_view_clip" type="checkbox" /> Clip to Window</label>
                     </li>
                     <li>
                         <label for="noVNC_setting_resize">Scaling Mode:</label>
                         <select id="noVNC_setting_resize" name="vncResize">
                             <option value="off">None</option>
                             <option value="scale">Local Scaling</option>
-                            <option value="downscale">Local Downscaling</option>
                             <option value="remote">Remote Resizing</option>
                         </select>
                     </li>
-                    <li>
-                        <label for="noVNC_setting_repeaterID">Repeater ID:</label>
-                        <input id="noVNC_setting_repeaterID" type="input" value="" />
-                    </li>
-                    <li><hr></li>
-                    <!-- Stylesheet selection dropdown -->
-                    <li>
-                        <label>Style:
-                            <select id="noVNC_setting_stylesheet" name="vncStyle">
-                                <option value="default">default</option>
-                            </select>
-                        </label>
-                    </li>
-                    <!-- Logging selection dropdown -->
-                    <li>
-                        <label>Logging:
-                            <select id="noVNC_setting_logging" name="vncLogging">
-                            </select>
-                        </label>
-                    </li>
                     <li><hr></li>
                     <li>
-                        <input type="button" id="noVNC_settings_apply" value="Apply" class="noVNC_submit" />
+                        <div class="noVNC_expander">Advanced</div>
+                        <div><ul>
+                            <li>
+                                <label for="noVNC_setting_repeaterID">Repeater ID:</label>
+                                <input id="noVNC_setting_repeaterID" type="input" value="" />
+                            </li>
+                            <li>
+                                <div class="noVNC_expander">WebSocket</div>
+                                <div><ul>
+                                    <li>
+                                        <label><input id="noVNC_setting_encrypt" type="checkbox" /> Encrypt</label>
+                                    </li>
+                                    <li>
+                                        <label for="noVNC_setting_host">Host:</label>
+                                        <input id="noVNC_setting_host" />
+                                    </li>
+                                    <li>
+                                        <label for="noVNC_setting_port">Port:</label>
+                                        <input id="noVNC_setting_port" type="number" />
+                                    </li>
+                                    <li>
+                                        <label for="noVNC_setting_path">Path:</label>
+                                        <input id="noVNC_setting_path" type="input" value="websockify" />
+                                    </li>
+                                </ul></div>
+                            </li>
+                            <li><hr></li>
+                            <li>
+                                <label><input id="noVNC_setting_reconnect" type="checkbox" /> Automatic Reconnect</label>
+                            </li>
+                            <li>
+                                <label for="noVNC_setting_reconnect_delay">Reconnect Delay (ms):</label>
+                                <input id="noVNC_setting_reconnect_delay" type="number" />
+                            </li>
+                            <li><hr></li>
+                            <!-- Logging selection dropdown -->
+                            <li>
+                                <label>Logging:
+                                    <select id="noVNC_setting_logging" name="vncLogging">
+                                    </select>
+                                </label>
+                            </li>
+                        </ul></div>
                     </li>
                 </ul>
             </div>
             </div>
 
             <!-- Connection Controls -->
-            <input type="image" alt="Connect" src="app/images/connect.svg"
-                id="noVNC_connect_controls_button" class="noVNC_button"
-                title="Connect" />
             <input type="image" alt="Disconnect" src="app/images/disconnect.svg"
                 id="noVNC_disconnect_button" class="noVNC_button"
                 title="Disconnect" />
-            <div class="noVNC_vcenter">
-            <div id="noVNC_connect_controls" class="noVNC_panel">
-                <ul>
-                    <li class="noVNC_heading">
-                        <img src="app/images/connect.svg"> Connection
-                    </li>
-                    <li>
-                        <label for="noVNC_setting_host">Host:</label>
-                        <input id="noVNC_setting_host" />
-                    </li>
-                    <li>
-                        <label for="noVNC_setting_port">Port:</label>
-                        <input id="noVNC_setting_port" />
-                    </li>
-                    <li>
-                        <label for="noVNC_setting_password">Password:</label>
-                        <input id="noVNC_setting_password" type="password" />
-                    </li>
-                    <li>
-                        <label for="noVNC_setting_token">Token:</label>
-                        <input id="noVNC_setting_token" />
-                    </li>
-                    <li><hr></li>
-                    <li>
-                        <input id="noVNC_connect_button" type="button" value="Connect" class="noVNC_submit" />
-                    </li>
-                </ul>
-            </div>
-            </div>
 
             </div>
         </div>
+
+        <div id="noVNC_control_bar_hint"></div>
 
     </div> <!-- End of noVNC_control_bar -->
 
     <!-- Status Dialog -->
     <div id="noVNC_status"></div>
 
-    <!-- Password Dialog -->
+    <!-- Connect button -->
     <div class="noVNC_center">
-    <div id="noVNC_password_dlg" class="noVNC_panel">
+        <div id="noVNC_connect_dlg">
+            <div class="noVNC_logo" translate="no"><span>no</span>VNC</div>
+            <div id="noVNC_connect_button"><div>
+                <img src="app/images/connect.svg"> Connect
+            </div></div>
+        </div>
+    </div>
+
+    <!-- Password Dialog -->
+    <div class="noVNC_center noVNC_connect_layer">
+    <div id="noVNC_password_dlg" class="noVNC_panel"><form>
         <ul>
             <li>
                 <label>Password:</label>
                 <input id="noVNC_password_input" type="password" />
             </li>
             <li>
-                <input id="noVNC_password_button" type="button" value="Send Password" class="noVNC_submit" />
+                <input id="noVNC_password_button" type="submit" value="Send Password" class="noVNC_submit" />
             </li>
         </ul>
-    </div>
+    </form></div>
     </div>
 
     <!-- Transition Screens -->
     <div id="noVNC_transition">
         <div id="noVNC_transition_text"></div>
+        <div>
+        <input type="button" id="noVNC_cancel_reconnect_button" value="Cancel" class="noVNC_submit" />
+        </div>
         <div class="noVNC_spinner"></div>
     </div>
 
+    <!-- This is where the RFB elements will attach -->
     <div id="noVNC_container">
-        <h1 id="noVNC_logo" class="noVNC_logo"><span>no</span><br />VNC</h1>
-
-        <!-- HTML5 Canvas -->
-        <div id="noVNC_screen">
-            <!-- Note that Google Chrome on Android doesn't respect any of these,
-                 html attributes which attempt to disable text suggestions on the
-                 on-screen keyboard. Let's hope Chrome implements the ime-mode
-                 style for example -->
-            <textarea id="noVNC_keyboardinput" autocapitalize="off"
-                autocorrect="off" autocomplete="off" spellcheck="false"
-                mozactionhint="Enter"></textarea>
-
-            <canvas id="noVNC_canvas" width="0" height="0">
-                        Canvas not supported.
-            </canvas>
-        </div>
-
+        <!-- Note that Google Chrome on Android doesn't respect any of these,
+             html attributes which attempt to disable text suggestions on the
+             on-screen keyboard. Let's hope Chrome implements the ime-mode
+             style for example -->
+        <textarea id="noVNC_keyboardinput" autocapitalize="off"
+            autocorrect="off" autocomplete="off" spellcheck="false"
+            mozactionhint="Enter" tabindex="-1"></textarea>
     </div>
 
     <audio id="noVNC_bell">
         <source src="app/sounds/bell.oga" type="audio/ogg">
         <source src="app/sounds/bell.mp3" type="audio/mpeg">
     </audio>
-
-    <!-- begin scripts -->
-    <script src="core/util.js"></script>
-    <script src="app/webutil.js"></script>
-    <script src="app/ui.js"></script>
-    <!-- end scripts -->
-
  </body>
 </html>

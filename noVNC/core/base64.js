@@ -4,10 +4,9 @@
 
 // From: http://hg.mozilla.org/mozilla-central/raw-file/ec10630b1a54/js/src/devtools/jint/sunspider/string-base64.js
 
-/*jslint white: false */
-/*global console */
+import * as Log from './util/logging.js';
 
-var Base64 = {
+export default {
     /* Convert data (an array of integers) to a Base64 string. */
     toBase64Table : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='.split(''),
     base64Pad     : '=',
@@ -15,7 +14,7 @@ var Base64 = {
     encode: function (data) {
         "use strict";
         var result = '';
-        var toBase64Table = Base64.toBase64Table;
+        var toBase64Table = this.toBase64Table;
         var length = data.length;
         var lengthpad = (length % 3);
         // Convert every three bytes to 4 ascii characters.
@@ -47,7 +46,6 @@ var Base64 = {
     },
 
     /* Convert Base64 data to a string */
-    /* jshint -W013 */
     toBinaryTable : [
         -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
         -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
@@ -58,13 +56,12 @@ var Base64 = {
         -1,26,27,28, 29,30,31,32, 33,34,35,36, 37,38,39,40,
         41,42,43,44, 45,46,47,48, 49,50,51,-1, -1,-1,-1,-1
     ],
-    /* jshint +W013 */
 
     decode: function (data, offset) {
         "use strict";
         offset = typeof(offset) !== 'undefined' ? offset : 0;
-        var toBinaryTable = Base64.toBinaryTable;
-        var base64Pad = Base64.base64Pad;
+        var toBinaryTable = this.toBinaryTable;
+        var base64Pad = this.base64Pad;
         var result, result_length;
         var leftbits = 0; // number of bits decoded, but yet to be appended
         var leftdata = 0; // bits decoded, but yet to be appended
@@ -82,7 +79,7 @@ var Base64 = {
             var padding = (data.charAt(i) === base64Pad);
             // Skip illegal characters and whitespace
             if (c === -1) {
-                console.error("Illegal character code " + data.charCodeAt(i) + " at position " + i);
+                Log.Error("Illegal character code " + data.charCodeAt(i) + " at position " + i);
                 continue;
             }
 
@@ -111,5 +108,3 @@ var Base64 = {
         return result;
     }
 }; /* End of Base64 namespace */
-
-/* [module] export default Base64; */

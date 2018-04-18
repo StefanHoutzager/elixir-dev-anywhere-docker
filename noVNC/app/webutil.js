@@ -7,65 +7,21 @@
  * See README.md for usage and integration instructions.
  */
 
-/*jslint bitwise: false, white: false, browser: true, devel: true */
-/*global Util, window, document */
-
-/* [module]
- * import Util from "../core/util";
- */
-
-// Globals defined here
-var WebUtil = {};
-
-/*
- * ------------------------------------------------------
- * Namespaced in WebUtil
- * ------------------------------------------------------
- */
+import { init_logging as main_init_logging } from '../core/util/logging.js';
 
 // init log level reading the logging HTTP param
-WebUtil.init_logging = function (level) {
+export function init_logging (level) {
     "use strict";
     if (typeof level !== "undefined") {
-        Util._log_level = level;
+        main_init_logging(level);
     } else {
         var param = document.location.href.match(/logging=([A-Za-z0-9\._\-]*)/);
-        Util._log_level = (param || ['', Util._log_level])[1];
+        main_init_logging(param || undefined);
     }
-    Util.init_logging();
-};
-
-
-WebUtil.dirObj = function (obj, depth, parent) {
-    "use strict";
-    if (! depth) { depth = 2; }
-    if (! parent) { parent = ""; }
-
-    // Print the properties of the passed-in object
-    var msg = "";
-    for (var i in obj) {
-        if ((depth > 1) && (typeof obj[i] === "object")) {
-            // Recurse attributes that are objects
-            msg += WebUtil.dirObj(obj[i], depth - 1, parent + "." + i);
-        } else {
-            //val = new String(obj[i]).replace("\n", " ");
-            var val = "";
-            if (typeof(obj[i]) === "undefined") {
-                val = "undefined";
-            } else {
-                val = obj[i].toString().replace("\n", " ");
-            }
-            if (val.length > 30) {
-                val = val.substr(0, 30) + "...";
-            }
-            msg += parent + "." + i + ": " + val + "\n";
-        }
-    }
-    return msg;
 };
 
 // Read a query string variable
-WebUtil.getQueryVar = function (name, defVal) {
+export function getQueryVar (name, defVal) {
     "use strict";
     var re = new RegExp('.*[?&]' + name + '=([^&#]*)'),
         match = document.location.href.match(re);
@@ -78,7 +34,7 @@ WebUtil.getQueryVar = function (name, defVal) {
 };
 
 // Read a hash fragment variable
-WebUtil.getHashVar = function (name, defVal) {
+export function getHashVar (name, defVal) {
     "use strict";
     var re = new RegExp('.*[&#]' + name + '=([^&]*)'),
         match = document.location.hash.match(re);
@@ -92,11 +48,11 @@ WebUtil.getHashVar = function (name, defVal) {
 
 // Read a variable from the fragment or the query string
 // Fragment takes precedence
-WebUtil.getConfigVar = function (name, defVal) {
+export function getConfigVar (name, defVal) {
     "use strict";
-    var val = WebUtil.getHashVar(name);
+    var val = getHashVar(name);
     if (val === null) {
-        val = WebUtil.getQueryVar(name, defVal);
+        val = getQueryVar(name, defVal);
     }
     return val;
 };
@@ -106,7 +62,7 @@ WebUtil.getConfigVar = function (name, defVal) {
  */
 
 // No days means only for this browser session
-WebUtil.createCookie = function (name, value, days) {
+export function createCookie (name, value, days) {
     "use strict";
     var date, expires;
     if (days) {
@@ -126,7 +82,7 @@ WebUtil.createCookie = function (name, value, days) {
     document.cookie = name + "=" + value + expires + "; path=/" + secure;
 };
 
-WebUtil.readCookie = function (name, defaultValue) {
+export function readCookie (name, defaultValue) {
     "use strict";
     var nameEQ = name + "=",
         ca = document.cookie.split(';');
@@ -139,116 +95,87 @@ WebUtil.readCookie = function (name, defaultValue) {
     return (typeof defaultValue !== 'undefined') ? defaultValue : null;
 };
 
-WebUtil.eraseCookie = function (name) {
+export function eraseCookie (name) {
     "use strict";
-    WebUtil.createCookie(name, "", -1);
+    createCookie(name, "", -1);
 };
 
 /*
  * Setting handling.
  */
 
-WebUtil.initSettings = function (callback /*, ...callbackArgs */) {
+var settings = {};
+
+export function initSettings (callback /*, ...callbackArgs */) {
     "use strict";
     var callbackArgs = Array.prototype.slice.call(arguments, 1);
     if (window.chrome && window.chrome.storage) {
         window.chrome.storage.sync.get(function (cfg) {
-            WebUtil.settings = cfg;
-            console.log(WebUtil.settings);
+            settings = cfg;
             if (callback) {
                 callback.apply(this, callbackArgs);
             }
         });
     } else {
-        // No-op
+        settings = {};
         if (callback) {
             callback.apply(this, callbackArgs);
         }
     }
 };
 
+// Update the settings cache, but do not write to permanent storage
+export function setSetting (name, value) {
+    settings[name] = value;
+};
+
 // No days means only for this browser session
-WebUtil.writeSetting = function (name, value) {
+export function writeSetting (name, value) {
     "use strict";
+    if (settings[name] === value) return;
+    settings[name] = value;
     if (window.chrome && window.chrome.storage) {
-        //console.log("writeSetting:", name, value);
-        if (WebUtil.settings[name] !== value) {
-            WebUtil.settings[name] = value;
-            window.chrome.storage.sync.set(WebUtil.settings);
-        }
+        window.chrome.storage.sync.set(settings);
     } else {
         localStorage.setItem(name, value);
     }
 };
 
-WebUtil.readSetting = function (name, defaultValue) {
+export function readSetting (name, defaultValue) {
     "use strict";
     var value;
-    if (window.chrome && window.chrome.storage) {
-        value = WebUtil.settings[name];
+    if ((name in settings) || (window.chrome && window.chrome.storage)) {
+        value = settings[name];
     } else {
         value = localStorage.getItem(name);
+        settings[name] = value;
     }
     if (typeof value === "undefined") {
         value = null;
     }
-    if (value === null && typeof defaultValue !== undefined) {
+    if (value === null && typeof defaultValue !== "undefined") {
         return defaultValue;
     } else {
         return value;
     }
 };
 
-WebUtil.eraseSetting = function (name) {
+export function eraseSetting (name) {
     "use strict";
+    // Deleting here means that next time the setting is read when using local
+    // storage, it will be pulled from local storage again.
+    // If the setting in local storage is changed (e.g. in another tab)
+    // between this delete and the next read, it could lead to an unexpected
+    // value change.
+    delete settings[name];
     if (window.chrome && window.chrome.storage) {
         window.chrome.storage.sync.remove(name);
-        delete WebUtil.settings[name];
     } else {
         localStorage.removeItem(name);
     }
 };
 
-/*
- * Alternate stylesheet selection
- */
-WebUtil.getStylesheets = function () {
-    "use strict";
-    var links = document.getElementsByTagName("link");
-    var sheets = [];
-
-    for (var i = 0; i < links.length; i += 1) {
-        if (links[i].title &&
-            links[i].rel.toUpperCase().indexOf("STYLESHEET") > -1) {
-            sheets.push(links[i]);
-        }
-    }
-    return sheets;
-};
-
-// No sheet means try and use value from cookie, null sheet used to
-// clear all alternates.
-WebUtil.selectStylesheet = function (sheet) {
-    "use strict";
-    if (typeof sheet === 'undefined') {
-        sheet = 'default';
-    }
-
-    var sheets = WebUtil.getStylesheets();
-    for (var i = 0; i < sheets.length; i += 1) {
-        var link = sheets[i];
-        if (link.title === sheet) {
-            Util.Debug("Using stylesheet " + sheet);
-            link.disabled = false;
-        } else {
-            //Util.Debug("Skipping stylesheet " + link.title);
-            link.disabled = true;
-        }
-    }
-    return sheet;
-};
-
-WebUtil.injectParamIfMissing = function (path, param, value) {
+export function injectParamIfMissing (path, param, value) {
     // force pretend that we're dealing with a relative path
     // (assume that we wanted an extra if we pass one in)
     path = "/" + path;
@@ -278,172 +205,36 @@ WebUtil.injectParamIfMissing = function (path, param, value) {
     }
 };
 
-// Emulate Element.setCapture() when not supported
+// sadly, we can't use the Fetch API until we decide to drop
+// IE11 support or polyfill promises and fetch in IE11.
+// resolve will receive an object on success, while reject
+// will receive either an event or an error on failure.
+export function fetchJSON(path, resolve, reject) {
+    // NB: IE11 doesn't support JSON as a responseType
+    var req = new XMLHttpRequest();
+    req.open('GET', path);
 
-WebUtil._captureRecursion = false;
-WebUtil._captureProxy = function (e) {
-    // Recursion protection as we'll see our own event
-    if (WebUtil._captureRecursion) return;
-
-    // Clone the event as we cannot dispatch an already dispatched event
-    var newEv = new e.constructor(e.type, e);
-
-    WebUtil._captureRecursion = true;
-    WebUtil._captureElem.dispatchEvent(newEv);
-    WebUtil._captureRecursion = false;
-
-    // Implicitly release the capture on button release
-    if ((e.type === "mouseup") || (e.type === "touchend")) {
-        WebUtil.releaseCapture();
-    }
-};
-
-WebUtil.setCapture = function (elem) {
-    if (elem.setCapture) {
-
-        elem.setCapture();
-
-        // IE releases capture on 'click' events which might not trigger
-        elem.addEventListener('mouseup', WebUtil.releaseCapture);
-        elem.addEventListener('touchend', WebUtil.releaseCapture);
-
-    } else {
-        // Safari on iOS 9 has a broken constructor for TouchEvent.
-        // We are fine in this case however, since Safari seems to
-        // have some sort of implicit setCapture magic anyway.
-        if (window.TouchEvent !== undefined) {
+    req.onload = function () {
+        if (req.status === 200) {
             try {
-                new TouchEvent("touchstart");
-            } catch (TypeError) {
+                var resObj = JSON.parse(req.responseText);
+            } catch (err) {
+                reject(err);
                 return;
             }
-        }
-
-        var captureElem = document.getElementById("noVNC_mouse_capture_elem");
-
-        if (captureElem === null) {
-            captureElem = document.createElement("div");
-            captureElem.id = "noVNC_mouse_capture_elem";
-            captureElem.style.position = "fixed";
-            captureElem.style.top = "0px";
-            captureElem.style.left = "0px";
-            captureElem.style.width = "100%";
-            captureElem.style.height = "100%";
-            captureElem.style.zIndex = 10000;
-            captureElem.style.display = "none";
-            document.body.appendChild(captureElem);
-
-            captureElem.addEventListener('mousemove', WebUtil._captureProxy);
-            captureElem.addEventListener('mouseup', WebUtil._captureProxy);
-
-            captureElem.addEventListener('touchmove', WebUtil._captureProxy);
-            captureElem.addEventListener('touchend', WebUtil._captureProxy);
-        }
-
-        WebUtil._captureElem = elem;
-        captureElem.style.display = null;
-
-        // We listen to events on window in order to keep tracking if it
-        // happens to leave the viewport
-        window.addEventListener('mousemove', WebUtil._captureProxy);
-        window.addEventListener('mouseup', WebUtil._captureProxy);
-
-        window.addEventListener('touchmove', WebUtil._captureProxy);
-        window.addEventListener('touchend', WebUtil._captureProxy);
-    }
-};
-
-WebUtil.releaseCapture = function () {
-    if (document.releaseCapture) {
-
-        document.releaseCapture();
-
-    } else {
-        var captureElem = document.getElementById("noVNC_mouse_capture_elem");
-        WebUtil._captureElem = null;
-        captureElem.style.display = "none";
-
-        window.removeEventListener('mousemove', WebUtil._captureProxy);
-        window.removeEventListener('mouseup', WebUtil._captureProxy);
-
-        window.removeEventListener('touchmove', WebUtil._captureProxy);
-        window.removeEventListener('touchend', WebUtil._captureProxy);
-    }
-};
-
-
-// Get language file location
-WebUtil.getLanguageFileLocation = function () {
-    return '../app/locale/locale-'+Util.Localisation.getLanguageCode()+'.js';
-};
-
-// Dynamically load scripts without using document.write()
-// Reference: http://unixpapa.com/js/dyna.html
-//
-// Handles the case where load_scripts is invoked from a script that
-// itself is loaded via load_scripts. Once all scripts are loaded the
-// window.onscriptsloaded handler is called (if set).
-WebUtil.get_include_uri = function (root_dir) {
-    return (typeof INCLUDE_URI !== "undefined") ? INCLUDE_URI + root_dir + '/' : root_dir + '/';
-};
-WebUtil._loading_scripts = [];
-WebUtil._pending_scripts = [];
-WebUtil.load_scripts = function (files_by_dir) {
-    "use strict";
-    var head = document.getElementsByTagName('head')[0], script,
-        ls = WebUtil._loading_scripts, ps = WebUtil._pending_scripts;
-
-    var loadFunc = function (e) {
-        while (ls.length > 0 && (ls[0].readyState === 'loaded' ||
-                                 ls[0].readyState === 'complete')) {
-            // For IE, append the script to trigger execution
-            var s = ls.shift();
-            //console.log("loaded script: " + s.src);
-            head.appendChild(s);
-        }
-        if (!this.readyState ||
-            (Util.Engine.presto && this.readyState === 'loaded') ||
-            this.readyState === 'complete') {
-            if (ps.indexOf(this) >= 0) {
-                this.onload = this.onreadystatechange = null;
-                //console.log("completed script: " + this.src);
-                ps.splice(ps.indexOf(this), 1);
-
-                // Call window.onscriptsload after last script loads
-                if (ps.length === 0 && window.onscriptsload) {
-                    window.onscriptsload();
-                }
-            }
+            resolve(resObj);
+        } else {
+            reject(new Error("XHR got non-200 status while trying to load '" + path + "': " + req.status));
         }
     };
 
-    var root_dirs = Object.keys(files_by_dir);
+    req.onerror = function (evt) {
+        reject(new Error("XHR encountered an error while trying to load '" + path + "': " + evt.message));
+    };
 
-    for (var d = 0; d < root_dirs.length; d++) {
-        var root_dir = root_dirs[d];
-        var files = files_by_dir[root_dir];
+    req.ontimeout = function (evt) {
+        reject(new Error("XHR timed out while trying to load '" + path + "'"));
+    };
 
-        for (var f = 0; f < files.length; f++) {
-            script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = WebUtil.get_include_uri(root_dir) + files[f];
-            //console.log("loading script: " + script.src);
-            script.onload = script.onreadystatechange = loadFunc;
-            // In-order script execution tricks
-            if (Util.Engine.trident) {
-                // For IE wait until readyState is 'loaded' before
-                // appending it which will trigger execution
-                // http://wiki.whatwg.org/wiki/Dynamic_Script_Execution_Order
-                ls.push(script);
-            } else {
-                // For webkit and firefox set async=false and append now
-                // https://developer.mozilla.org/en-US/docs/HTML/Element/script
-                script.async = false;
-                head.appendChild(script);
-            }
-            ps.push(script);
-        }
-    }
-};
-
-/* [module] export default WebUtil; */
+    req.send();
+}
