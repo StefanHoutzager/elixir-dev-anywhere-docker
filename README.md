@@ -23,7 +23,7 @@ With this repository you can build a docker image that makes it possible to deve
 
 5.  You have an elixir-dev-anywhere-docker folder in your repofolder now. Copy Dockerfile and docker-compose.yml from 
     elixir-dev-anywhere-docker to your repo folder. There are a couple of ADD statements in the Dockerfile that put files from the elixir-dev-anywhere-docker folder on the host into your image, this way you   
-    make sure you have the original files in the repo. Look for the newest version of the intellij-elixir plugin at https://github.com/KronicDeth/intellij-elixir/releases, intellij-elixir.zip , I placed version 4.2.0 in the elixir-dev-anywhere-docker folder. Replace it if you want.
+    make sure you have the original files in the repo. Look for the newest version of the intellij-elixir plugin at https://github.com/KronicDeth/intellij-elixir/releases, intellij-elixir.zip , I placed version 7.4.0 in the elixir-dev-anywhere-docker folder. Replace it if you want.
 
 6.  Look for the string badpassword in the Dockerfile and replace it with the ones you prefer use.
 
