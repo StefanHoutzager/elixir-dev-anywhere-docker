@@ -59,6 +59,9 @@ docker cp your_containername:/home/ubuntu/.IdeaIC2017.3/config /var/lib/docker/v
 19. Shutdown the running containers, remove the comment sign (#) in docker-compose.yml from the line - /var/lib/docker/volumes/intellij/_data/.IdeaIC2017.3/config:/home/ubuntu/.IdeaIC2017.3/config
 and restart with sudo docker-compose up -d 
 
+20. If you get a http timeout error when bringing down the containers with sudo docker-compose down create a .env file with f.e. (default for COMPOSE_HTTP_TIMEOUT is 50)
+
+    COMPOSE_HTTP_TIMEOUT=200
 
 #Credits
 
