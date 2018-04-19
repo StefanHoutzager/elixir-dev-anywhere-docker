@@ -59,7 +59,10 @@ RUN apt-get update \
 
 RUN apt-get install -y \
     python-numpy \
-    software-properties-common
+    software-properties-common \
+    libsecret-1-0 \
+    gnome-keyring
+
 RUN apt-get install -y --force-yes --no-install-recommends supervisor \
     openssh-server \
     pwgen \
