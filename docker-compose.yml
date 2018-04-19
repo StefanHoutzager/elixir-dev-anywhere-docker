@@ -21,7 +21,7 @@ services:
       - 6080:6080
     volumes:
       - /var/lib/docker/volumes/volume_name_onhost/_data:/folder_name_in_container
-#      - /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.3/config:/home/ubuntu/.IdeaIC2016.3/config
+#      - /var/lib/docker/volumes/intellij/_data/.IdeaIC2017.3/config:/home/ubuntu/.IdeaIC2017.3/config
 #      - /var/lib/docker/volumes/openbox/_data:/home/ubuntu/.config/openbox
       - /tmp/.X11-unix:/tmp/.X11-unix
     stdin_open: true 

@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 MAINTAINER Stefan Houtzager <stefan.houtzager@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV REFRESHED_AT 18-04-2017
+ENV REFRESHED_AT 19-04-2017
 ENV TERM xterm
 
 WORKDIR /
@@ -116,32 +116,27 @@ RUN sed 's/main$/main universe/' -i /etc/apt/sources.list && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
 
-RUN mkdir -p /home/ubuntu/.IdeaIC2016.3/config/options && \
-    mkdir -p /home/ubuntu/.IdeaIC2016.3/config/plugins
+RUN mkdir -p /home/ubuntu/.IdeaIC2017.3/config/options && \
+    mkdir -p /home/ubuntu/.IdeaIC2017.3/config/plugins
 
-ADD elixir-dev-anywhere-docker/jdk.table.xml /home/ubuntu/.IdeaIC2016.3/config/options/jdk.table.xml
+ADD elixir-dev-anywhere-docker/jdk.table.xml /home/ubuntu/.IdeaIC2017.3/config/options/jdk.table.xml
 ADD elixir-dev-anywhere-docker/jdk.table.xml /home/ubuntu/.jdk.table.xml
 ADD elixir-dev-anywhere-docker/intellij/run /usr/local/bin/intellij
-ADD elixir-dev-anywhere-docker/intellij-elixir.zip /home/ubuntu/.IdeaIC2016.3/config/plugins/intellij-elixir.zip
+ADD elixir-dev-anywhere-docker/intellij-elixir.zip /home/ubuntu/.IdeaIC2017.3/config/plugins/intellij-elixir.zip
 
 RUN chmod +x /usr/local/bin/intellij
 
 RUN echo 'Downloading IntelliJ IDEA' && \
-    wget https://download.jetbrains.com/idea/ideaIC-2016.3.6.tar.gz -O /tmp/intellij.tar.gz -q && \
+    wget https://download.jetbrains.com/idea/ideaIC-2017.3.5.tar.gz -O /tmp/intellij.tar.gz -q && \
     echo 'Installing IntelliJ IDEA' && \
     mkdir -p /opt/intellij && \
     tar -xf /tmp/intellij.tar.gz --strip-components=1 -C /opt/intellij && \
     rm /tmp/intellij.tar.gz
 
 RUN echo 'Installing Elixir plugin' && \
-    cd /home/ubuntu/.IdeaIC2016.3/config/plugins/ && \
+    cd /home/ubuntu/.IdeaIC2017.3/config/plugins/ && \
     unzip -q intellij-elixir.zip && \
     rm intellij-elixir.zip
-
-RUN echo 'Installing Markdown plugin' && \
-    wget https://plugins.jetbrains.com/files/7793/25156/markdown-2016.1.20160405.zip -O markdown.zip -q && \
-    unzip -q markdown.zip && \
-    rm markdown.zip
 
 # noVNC
 ADD elixir-dev-anywhere-docker/noVNC /noVNC/

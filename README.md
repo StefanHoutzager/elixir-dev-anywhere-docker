@@ -54,9 +54,9 @@ With this repository you can build a docker image that makes it possible to deve
 save the settings.jar in the default folder (file -> export settings)
 
 18. Close intellij and copy the IDE setting from the running docker-container to the volume on your host (sudo -i to get rights): 
-docker cp your_containername:/home/ubuntu/.IdeaIC2016.3/config /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.3  
+docker cp your_containername:/home/ubuntu/.IdeaIC2017.3/config /var/lib/docker/volumes/intellij/_data/.IdeaIC2017.3
 
-19. Shutdown the running containers, remove the comment sign (#) in docker-compose.yml from the line - /var/lib/docker/volumes/intellij/_data/.IdeaIC2016.3/config:/home/ubuntu/.IdeaIC2016.3/config
+19. Shutdown the running containers, remove the comment sign (#) in docker-compose.yml from the line - /var/lib/docker/volumes/intellij/_data/.IdeaIC2017.3/config:/home/ubuntu/.IdeaIC2017.3/config
 and restart with sudo docker-compose up -d 
 
 
