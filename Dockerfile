@@ -22,7 +22,6 @@ ENV LC_ALL en_US.UTF-8
 RUN echo "deb http://packages.erlang-solutions.com/ubuntu trusty contrib" >> /etc/apt/sources.list && \
     apt-key adv --fetch-keys http://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc && \
     apt-get -qq update && apt-get install -y \
-    esl-erlang \
     esl-erlang=1:20.3 \
     build-essential \
     wget && \
