@@ -39,7 +39,7 @@ stderr_logfile=/var/log/lxsession.err
 [program:x11vnc]
 priority=20
 directory=/
-command=x11vnc -display :1 -xkb -rfbauth /home/root/.vnc/passwd 
+command=x11vnc -repeat -forever -display :1 -xkb -rfbauth /home/root/.vnc/passwd
 #command=x11vnc -ncache 10 -display :1 -xkb -rfbauth /home/root/.vnc/passwd
 #command=x11vnc -display :1 -listen localhost -xkb
 user=root
