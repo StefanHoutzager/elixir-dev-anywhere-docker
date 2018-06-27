@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 MAINTAINER Stefan Houtzager <stefan.houtzager@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV REFRESHED_AT 19-04-2017
+ENV REFRESHED_AT 27-06-2017
 ENV TERM xterm
 
 WORKDIR /
@@ -30,7 +30,7 @@ RUN echo "deb http://packages.erlang-solutions.com/ubuntu trusty contrib" >> /et
 
 # Download and Install Specific Version of Elixir
 WORKDIR /elixir
-RUN wget -q https://github.com/elixir-lang/elixir/releases/download/v1.6.4/Precompiled.zip && \
+RUN wget -q https://github.com/elixir-lang/elixir/releases/download/v1.6.5/Precompiled.zip && \
     unzip Precompiled.zip && \
     rm -f Precompiled.zip && \
     ln -s /elixir/bin/elixirc /usr/local/bin/elixirc && \
@@ -101,7 +101,7 @@ RUN rm -r /openbox-config
 ENV HOME=/home/ubuntu
 
 # Install phoenix, local Elixir hex and rebar (in ENV HOME)
-RUN mix archive.install --force https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez && \  
+RUN mix archive.install --force https://github.com/phoenixframework/archives/raw/master/phx_new.ez && \
     mix local.hex --force && \
     mix local.rebar --force && \
     mix hex.info
