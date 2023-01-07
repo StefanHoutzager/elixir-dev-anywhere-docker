@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:20.04
 MAINTAINER Stefan Houtzager <stefan.houtzager@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -7,31 +7,37 @@ ENV TERM xterm
 
 WORKDIR /
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y \
-    wget \
-    curl \
-    git \
-    unzip
+RUN apt-get update
+
+RUN apt-get install locales
 
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+    wget \
+    curl \
+    git \
+    unzip \
+    gnupg
+
 # erlang install
-RUN echo "deb http://packages.erlang-solutions.com/ubuntu trusty contrib" >> /etc/apt/sources.list && \
+RUN echo "deb http://packages.erlang-solutions.com/ubuntu focal contrib" >> /etc/apt/sources.list && \
     apt-key adv --fetch-keys http://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc && \
     apt-get -qq update && apt-get install -y \
-    esl-erlang=1:20.3 \
+    esl-erlang \
+    software-properties-common \
     build-essential \
     wget && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Download and Install Specific Version of Elixir
 WORKDIR /elixir
-RUN wget -q https://github.com/elixir-lang/elixir/releases/download/v1.6.5/Precompiled.zip && \
-    unzip Precompiled.zip && \
-    rm -f Precompiled.zip && \
+RUN wget -q https://github.com/elixir-lang/elixir/releases/download/v1.14.2/elixir-otp-23.zip && \
+    unzip elixir-otp-23 && \
+    rm -f elixir-otp-23 && \
     ln -s /elixir/bin/elixirc /usr/local/bin/elixirc && \
     ln -s /elixir/bin/elixir /usr/local/bin/elixir && \
     ln -s /elixir/bin/mix /usr/local/bin/mix && \
@@ -40,27 +46,41 @@ RUN wget -q https://github.com/elixir-lang/elixir/releases/download/v1.6.5/Preco
 WORKDIR /
 
 # install Node.js (>= 5.0.0) and NPM in order to satisfy brunch.io dependencies
-RUN curl -sL https://deb.nodesource.com/setup_9.x | bash - && apt-get -y install nodejs inotify-tools
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && apt-get -y install nodejs inotify-tools
 
-# setup our Ubuntu sources (ADD breaks caching)
-RUN echo "deb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse\n\
-deb http://archive.ubuntu.com/ubuntu trusty-updates main restricted universe multiverse\n\
-deb http://archive.ubuntu.com/ubuntu trusty-backports main restricted universe multiverse\n\
-deb http://security.ubuntu.com/ubuntu trusty-security main restricted universe multiverse \n\
-"> /etc/apt/sources.list
+# setup our Ubuntu sources (ADD breaks caching). allow either x86 or ARM
+RUN \
+	ARCH=`uname -m` && \
+	if [ "$ARCH" = "x86_64" ]; then \
+		echo "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse"           >>/etc/apt/sources.list && \
+		echo "deb http://security.ubuntu.com/ubuntu focal-security main restricted universe multiverse" >>/etc/apt/sources.list && \
+		echo "deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse"  >>/etc/apt/sources.list && \
+        echo "deb http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse"  >>/etc/apt/sources.list; \
+	else \
+		echo "deb http://ports.ubuntu.com/ubuntu-ports/ focal main restricted universe multiverse"           >>/etc/apt/sources.list && \
+		echo "deb http://ports.ubuntu.com/ubuntu-ports focal-security main restricted universe multiverse" >>/etc/apt/sources.list && \
+		echo "deb http://ports.ubuntu.com/ubuntu-ports/ focal-updates main restricted universe multiverse"  >>/etc/apt/sources.list && \
+        echo "deb http://ports.ubuntu.com/ubuntu-ports/ focal-backports main restricted universe multiverse"  >>/etc/apt/sources.list; \
+	fi
 
-# no Upstart or DBus
+# no Upstart or DBus - this is for older versions of ubuntu only
 # https://github.com/dotcloud/docker/issues/1724#issuecomment-26294856
-RUN apt-mark hold initscripts udev plymouth mountall
-RUN dpkg-divert --local --rename --add /sbin/initctl && ln -sf /bin/true /sbin/initctl
-RUN apt-get update \
-    && apt-get upgrade -y
+#RUN apt-mark hold initscripts udev plymouth mountall
+#RUN dpkg-divert --local --rename --add /sbin/initctl && ln -sf /bin/true /sbin/initctl
+#RUN apt-get update \
+#    && apt-get upgrade -y
+
+# python and pip
+RUN add-apt-repository universe && \
+    apt-get install -y python3 python3-distutils && \
+    curl -sL https://bootstrap.pypa.io/pip/get-pip.py --output get-pip.py && \
+    python3 get-pip.py
 
 RUN apt-get install -y \
-    python-numpy \
-    software-properties-common \
     libsecret-1-0 \
     gnome-keyring
+
+RUN pip3 install numpy
 
 RUN apt-get install -y --force-yes --no-install-recommends supervisor \
     openssh-server \
@@ -76,8 +96,8 @@ RUN apt-get install -y --force-yes --no-install-recommends supervisor \
     libreoffice \
     firefox \
     xserver-xorg-video-dummy \
-    && apt-get autoclean \
-    && apt-get autoremove \
+    && apt-get autoclean -y \
+    && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /etc/startup.aux/
@@ -100,7 +120,9 @@ RUN rm -r /openbox-config
 ENV HOME=/home/ubuntu
 
 # Install phoenix, local Elixir hex and rebar (in ENV HOME)
-RUN mix archive.install --force https://github.com/phoenixframework/archives/raw/master/phx_new.ez && \
+#RUN mix archive.install --force https://github.com/phoenixframework/archives/raw/master/phx_new.ez && \
+RUN wget https://github.com/phoenixframework/archives/raw/master/phx_new.ez && \
+    mix archive.install ./phx_new.ez && \
     mix local.hex --force && \
     mix local.rebar --force && \
     mix hex.info
@@ -118,25 +140,25 @@ RUN sed 's/main$/main universe/' -i /etc/apt/sources.list && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
 
-RUN mkdir -p /home/ubuntu/.IdeaIC2017.3/config/options && \
-    mkdir -p /home/ubuntu/.IdeaIC2017.3/config/plugins
+RUN mkdir -p /home/ubuntu/.IdeaIC2022.3.1/config/options && \
+    mkdir -p /home/ubuntu/.IdeaIC2022.3.1/config/plugins
 
-ADD elixir-dev-anywhere-docker/jdk.table.xml /home/ubuntu/.IdeaIC2017.3/config/options/jdk.table.xml
+ADD elixir-dev-anywhere-docker/jdk.table.xml /home/ubuntu/.IdeaIC2022.3.1/config/options/jdk.table.xml
 ADD elixir-dev-anywhere-docker/jdk.table.xml /home/ubuntu/.jdk.table.xml
 ADD elixir-dev-anywhere-docker/intellij/run /usr/local/bin/intellij
-ADD elixir-dev-anywhere-docker/intellij-elixir.zip /home/ubuntu/.IdeaIC2017.3/config/plugins/intellij-elixir.zip
+ADD elixir-dev-anywhere-docker/intellij-elixir.zip /home/ubuntu/.IdeaIC2022.3.1/config/plugins/intellij-elixir.zip
 
 RUN chmod +x /usr/local/bin/intellij
 
 RUN echo 'Downloading IntelliJ IDEA' && \
-    wget https://download.jetbrains.com/idea/ideaIC-2017.3.5.tar.gz -O /tmp/intellij.tar.gz -q && \
+    wget https://download.jetbrains.com/idea/ideaIC-2022.3.1.tar.gz -O /tmp/intellij.tar.gz && \
     echo 'Installing IntelliJ IDEA' && \
     mkdir -p /opt/intellij && \
     tar -xf /tmp/intellij.tar.gz --strip-components=1 -C /opt/intellij && \
     rm /tmp/intellij.tar.gz
 
 RUN echo 'Installing Elixir plugin' && \
-    cd /home/ubuntu/.IdeaIC2017.3/config/plugins/ && \
+    cd /home/ubuntu/.IdeaIC2022.3.1/config/plugins/ && \
     unzip -q intellij-elixir.zip && \
     rm intellij-elixir.zip
 
@@ -162,3 +184,4 @@ RUN apt-get update && apt-get install -y \
     pgadmin3 --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["/startup.sh"]
+
